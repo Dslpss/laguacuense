@@ -19,7 +19,6 @@ import { useJogadoresPorIds } from "@/hooks/useJogadoresPorIds";
 
 import { useEffect } from "react";
 import { obterEventosJogo } from "@/lib/firebase/eventos";
-import { Jogador } from "@/types";
 
 export default function PaginaPublica() {
   const [abaSelecionada, setAbaSelecionada] = useState("times");
@@ -92,57 +91,60 @@ export default function PaginaPublica() {
         </svg>
       </div>
 
-      <div className="relative container mx-auto py-12 px-4">
-        {/* Header Público Profissional */}
-        <div className="text-center mb-12">
-          {/* Ícones com efeito de brilho */}
-          <div className="flex items-center justify-center gap-6 mb-6">
+      {/* Header e título fora do SVG */}
+      <div className="relative container mx-auto py-4 px-2 sm:py-8 sm:px-4 md:py-12 md:px-8 lg:px-16 xl:px-24">
+        <div className="text-center mb-6 sm:mb-10 md:mb-12">
+          <div className="flex items-center justify-center gap-3 sm:gap-6 mb-4 sm:mb-6">
             <div className="relative group">
               <div className="absolute inset-0 bg-yellow-500 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-yellow-400 to-yellow-600 p-4 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-transform">
-                <Trophy className="h-12 w-12 text-white" />
+              <div className="relative bg-gradient-to-br from-yellow-400 to-yellow-600 p-2 sm:p-4 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-transform">
+                <Trophy className="h-8 w-8 sm:h-12 sm:w-12 text-white" />
               </div>
             </div>
             <div className="relative group">
               <div className="absolute inset-0 bg-green-500 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-green-500 to-green-700 p-4 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-transform">
-                <Users className="h-12 w-12 text-white" />
+              <div className="relative bg-gradient-to-br from-green-500 to-green-700 p-2 sm:p-4 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-transform">
+                <Users className="h-8 w-8 sm:h-12 sm:w-12 text-white" />
               </div>
             </div>
           </div>
 
           {/* Título com gradiente premium */}
-          <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight flex flex-col items-center justify-center">
-            <span className="flex items-center justify-center gap-2 drop-shadow-2xl">
-              <span className="text-6xl md:text-7xl text-black">⚽</span>
+          <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-4 sm:mb-6 leading-tight flex flex-col items-center justify-center">
+            <span className="flex items-center justify-center gap-1 sm:gap-2 drop-shadow-2xl whitespace-nowrap sm:whitespace-normal">
+              <span className="flex-shrink-0 text-3xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-black">
+                ⚽
+              </span>
               <span className="bg-gradient-to-r from-white via-green-200 to-white bg-clip-text text-transparent">
                 Campeonato Lagoacuense
               </span>
             </span>
-            <span className="bg-gradient-to-r from-green-300 via-green-100 to-green-300 bg-clip-text text-transparent">
+            <span className="text-sm sm:text-xl md:text-3xl lg:text-4xl xl:text-5xl bg-gradient-to-r from-green-300 via-green-100 to-green-300 bg-clip-text text-transparent">
               de Futebol 2025
             </span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-green-100 font-light mb-10 max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-green-100 font-light mb-6 sm:mb-10 max-w-2xl mx-auto">
             Acompanhe os times, grupos e classificações do maior torneio da
             região
           </p>
 
           {/* Cards de informações premium */}
-          <div className="flex flex-wrap justify-center gap-4 mb-10">
-            <div className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-6 py-3 hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl">
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 mb-8 sm:mb-10">
+            <div className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 sm:px-6 py-3 hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl">
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-green-300" />
                 <div className="text-left">
                   <p className="text-xs text-green-200 font-medium">
                     Data de Início
                   </p>
-                  <p className="text-white font-bold">27/09/2025 às 15:30</p>
+                  <p className="text-sm sm:text-base text-white font-bold">
+                    27/09/2025 às 15:30
+                  </p>
                 </div>
               </div>
             </div>
-            <div className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-6 py-3 hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl">
+            <div className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 sm:px-6 py-3 hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl">
               <div className="flex items-center gap-3">
                 <svg
                   className="h-5 w-5 text-yellow-300"
@@ -159,11 +161,13 @@ export default function PaginaPublica() {
                 </svg>
                 <div className="text-left">
                   <p className="text-xs text-yellow-200 font-medium">Formato</p>
-                  <p className="text-white font-bold">16 equipes em 4 grupos</p>
+                  <p className="text-sm sm:text-base text-white font-bold">
+                    16 equipes em 4 grupos
+                  </p>
                 </div>
               </div>
             </div>
-            <div className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-6 py-3 hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl">
+            <div className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 sm:px-6 py-3 hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl">
               <div className="flex items-center gap-3">
                 <svg
                   className="h-5 w-5 text-blue-300"
@@ -182,7 +186,7 @@ export default function PaginaPublica() {
                   <p className="text-xs text-blue-200 font-medium">
                     Inscrições
                   </p>
-                  <p className="text-white font-bold">
+                  <p className="text-sm sm:text-base text-white font-bold">
                     {times.length}/16 times
                   </p>
                 </div>
@@ -191,30 +195,34 @@ export default function PaginaPublica() {
           </div>
 
           {/* Botão de regulamento premium */}
-          <Button
-            size="lg"
-            onClick={() => setRegulamentoAberto(true)}
-            className="h-14 px-8 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-2xl hover:shadow-green-500/50 transition-all border-2 border-green-400/30 hover:scale-105"
-          >
-            <BookOpen className="h-6 w-6 mr-2" />
-            <span className="text-lg font-bold">Ver Regulamento Completo</span>
-          </Button>
+          <div className="flex justify-center mb-8 sm:mb-10">
+            <Button
+              size="lg"
+              onClick={() => setRegulamentoAberto(true)}
+              className="h-10 sm:h-14 px-4 sm:px-8 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-2xl hover:shadow-green-500/50 transition-all border-2 border-green-400/30 hover:scale-105 w-full sm:w-auto"
+            >
+              <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+              <span className="text-sm sm:text-lg font-bold">
+                Ver Regulamento Completo
+              </span>
+            </Button>
+          </div>
         </div>
 
         {/* Navegação por abas premium */}
-        <div className="flex justify-center mb-10">
-          <div className="flex gap-3 p-2 bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20">
+        <div className="flex justify-center mb-8 sm:mb-10">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-2 bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20">
             <Button
               variant={abaSelecionada === "times" ? "default" : "ghost"}
               onClick={() => setAbaSelecionada("times")}
               className={
                 abaSelecionada === "times"
-                  ? "h-12 px-6 bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:shadow-xl"
-                  : "h-12 px-6 text-white hover:bg-white/10"
+                  ? "h-10 sm:h-12 px-3 sm:px-6 bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:shadow-xl"
+                  : "h-10 sm:h-12 px-3 sm:px-6 text-white hover:bg-white/10"
               }
             >
               <svg
-                className="h-5 w-5 mr-2"
+                className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -226,31 +234,31 @@ export default function PaginaPublica() {
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                 />
               </svg>
-              Times e Grupos
+              <span className="text-sm sm:text-base">Times e Grupos</span>
             </Button>
             <Button
               variant={abaSelecionada === "classificacao" ? "default" : "ghost"}
               onClick={() => setAbaSelecionada("classificacao")}
               className={
                 abaSelecionada === "classificacao"
-                  ? "h-12 px-6 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-lg hover:shadow-xl"
-                  : "h-12 px-6 text-white hover:bg-white/10"
+                  ? "h-10 sm:h-12 px-3 sm:px-6 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-lg hover:shadow-xl"
+                  : "h-10 sm:h-12 px-3 sm:px-6 text-white hover:bg-white/10"
               }
             >
-              <Trophy className="h-5 w-5 mr-2" />
-              Classificação
+              <Trophy className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+              <span className="text-sm sm:text-base">Classificação</span>
             </Button>
             <Button
               variant={abaSelecionada === "confrontos" ? "default" : "ghost"}
               onClick={() => setAbaSelecionada("confrontos")}
               className={
                 abaSelecionada === "confrontos"
-                  ? "h-12 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:shadow-xl"
-                  : "h-12 px-6 text-white hover:bg-white/10"
+                  ? "h-10 sm:h-12 px-3 sm:px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:shadow-xl"
+                  : "h-10 sm:h-12 px-3 sm:px-6 text-white hover:bg-white/10"
               }
             >
               <svg
-                className="h-5 w-5 mr-2"
+                className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -262,29 +270,29 @@ export default function PaginaPublica() {
                   d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                 />
               </svg>
-              Confrontos
+              <span className="text-sm sm:text-base">Confrontos</span>
             </Button>
           </div>
         </div>
 
         {/* Conteúdo das abas */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {abaSelecionada === "times" && (
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-7xl mx-auto px-2 sm:px-4">
               <ListaTimesPublica />
             </div>
           )}
 
           {abaSelecionada === "classificacao" && (
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-7xl mx-auto px-2 sm:px-4">
               <TabelaClassificacao />
             </div>
           )}
 
           {abaSelecionada === "confrontos" && (
-            <div className="max-w-5xl mx-auto">
-              <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-blue-300 mb-4 text-center">
+            <div className="max-w-7xl mx-auto px-2 sm:px-4">
+              <div className="space-y-4 sm:space-y-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-blue-300 mb-4 text-center">
                   Confrontos
                 </h2>
                 {carregandoJogos ? (
@@ -296,7 +304,7 @@ export default function PaginaPublica() {
                     Nenhum confronto cadastrado ainda.
                   </p>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                     {jogos.map((jogo) => {
                       const timeA = timesMap[jogo.timeA];
                       const timeB = timesMap[jogo.timeB];
