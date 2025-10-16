@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -16,6 +23,7 @@ import {
 export function FormularioTime() {
   const [nome, setNome] = useState("");
   const [cidade, setCidade] = useState("");
+  const [grupo, setGrupo] = useState<"A" | "B" | "C" | "D" | "">("");
   const [carregando, setCarregando] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,11 +40,13 @@ export function FormularioTime() {
       await adicionarTime({
         nome: nome.trim(),
         cidade: cidade.trim(),
+        ...(grupo ? { grupo } : {}),
       });
 
       // Limpa o formulário
       setNome("");
       setCidade("");
+      setGrupo("");
 
       alert("Time adicionado com sucesso!");
     } catch (error) {
@@ -79,6 +89,24 @@ export function FormularioTime() {
               placeholder="Ex: Arsenal"
               disabled={carregando}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="grupo">Grupo (opcional)</Label>
+            <Select
+              value={grupo}
+              onValueChange={(v: "A" | "B" | "C" | "D") => setGrupo(v)}
+            >
+              <SelectTrigger id="grupo">
+                <SelectValue placeholder="Selecione um grupo (A-D)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A">Grupo A</SelectItem>
+                <SelectItem value="B">Grupo B</SelectItem>
+                <SelectItem value="C">Grupo C</SelectItem>
+                <SelectItem value="D">Grupo D</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <Button type="submit" disabled={carregando} className="w-full">

@@ -8,12 +8,19 @@ import {
   query,
   orderBy,
   Timestamp,
+  getDocs,
+  writeBatch,
+  deleteField,
 } from "firebase/firestore";
 import { db } from "./config";
 import { Time, Jogador, Jogo, Sorteio } from "@/types";
 
 // Funções para Times
-export const adicionarTime = async (time: { nome: string; cidade: string }) => {
+export const adicionarTime = async (time: {
+  nome: string;
+  cidade: string;
+  grupo?: "A" | "B" | "C" | "D";
+}) => {
   try {
     const docRef = await addDoc(collection(db, "times"), {
       ...time,
@@ -55,10 +62,33 @@ export const excluirTime = async (id: string) => {
   }
 };
 
+// Remove o time e todos os jogadores da sua subcoleção
+export const removerTime = async (id: string) => {
+  try {
+    const batch = writeBatch(db);
+
+    // Deleta todos os jogadores do time (subcoleção)
+    const jogadoresSnap = await getDocs(
+      collection(db, "times", id, "jogadores")
+    );
+    jogadoresSnap.forEach((jogadorDoc) => {
+      batch.delete(jogadorDoc.ref);
+    });
+
+    // Deleta o documento do time
+    batch.delete(doc(db, "times", id));
+
+    await batch.commit();
+  } catch (error) {
+    console.error("Erro ao remover time e subcoleções:", error);
+    throw error;
+  }
+};
+
 // Funções para Jogadores (subcoleção)
 export const adicionarJogador = async (
   timeId: string,
-  jogador: Omit<Jogador, "id">
+  jogador: Omit<Jogador, "id" | "criadoEm">
 ) => {
   try {
     const docRef = await addDoc(collection(db, "times", timeId, "jogadores"), {
@@ -119,6 +149,24 @@ export const atualizarJogo = async (id: string, dados: Partial<Jogo>) => {
     await updateDoc(doc(db, "jogos", id), dados);
   } catch (error) {
     console.error("Erro ao atualizar jogo:", error);
+    throw error;
+  }
+};
+
+// Utilitário: limpar grupos de todos os times (remove o campo 'grupo')
+export const limparGruposDeTodosTimes = async () => {
+  try {
+    const snap = await getDocs(collection(db, "times"));
+    const batch = writeBatch(db);
+    snap.docs.forEach((d) => {
+      const data = d.data();
+      if (data && "grupo" in data && data.grupo) {
+        batch.update(d.ref, { grupo: deleteField() });
+      }
+    });
+    await batch.commit();
+  } catch (error) {
+    console.error("Erro ao limpar grupos dos times:", error);
     throw error;
   }
 };

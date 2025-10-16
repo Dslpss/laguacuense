@@ -99,6 +99,18 @@ service cloud.firestore {
       
       allow create: if request.auth != null 
         && validateJogoData(request.resource.data);
+        
+      // Subcoleção de eventos (gols, cartões, expulsões)
+      match /eventos/{eventoId} {
+        // Leitura pública para ver eventos do jogo
+        allow read: if true;
+        
+        // Escrita apenas para administradores
+        allow write: if request.auth != null;
+        
+        allow create: if request.auth != null 
+          && validateEventoData(request.resource.data);
+      }
     }
     
     // Regras para sorteios
@@ -197,7 +209,8 @@ service cloud.firestore {
       && data.nome.size() > 0
       && data.posicao.size() > 0
       && data.numero > 0
-      && (!data.keys().hasAny(['idade']) || (data.idade is number && data.idade > 0));
+      && (!data.keys().hasAny(['idade']) || (data.idade is number && data.idade > 0))
+      && (!data.keys().hasAny(['cpf']) || (data.cpf is string && data.cpf.size() >= 11 && data.cpf.size() <= 14));
   }
   
   // Validação para jogos
@@ -227,5 +240,18 @@ service cloud.firestore {
       && data.tipo is string
       && data.criadoEm is timestamp
       && data.tipo in ['grupos', 'semifinais'];
+  }
+  
+  // Validação para eventos de jogo (gols, cartões, expulsões)
+  function validateEventoData(data) {
+    return data.keys().hasAll(['tipo', 'jogadorId', 'timeId', 'criadoEm'])
+      && data.tipo is string
+      && data.jogadorId is string
+      && data.timeId is string
+      && data.criadoEm is timestamp
+      && data.tipo in ['gol', 'amarelo', 'vermelho', 'expulsao']
+      && data.jogadorId.size() > 0
+      && data.timeId.size() > 0
+      && (!data.keys().hasAny(['minuto']) || (data.minuto is number && data.minuto >= 0 && data.minuto <= 120));
   }
 }

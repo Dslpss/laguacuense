@@ -14,6 +14,7 @@ export interface Jogador {
   posicao: string;
   numero: number;
   idade?: number;
+  cpf?: string;
   criadoEm: Timestamp;
 }
 

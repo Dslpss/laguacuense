@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTimes } from "@/hooks/useTimes";
+import { Sorteios as SorteiosHistorico } from "@/components/tournament/Sorteios";
 
 export default function Home() {
   const [abaSelecionada, setAbaSelecionada] = useState("times");
@@ -111,6 +112,18 @@ export default function Home() {
             >
               🏆 Classificação
             </Button>
+            <Button
+              variant={abaSelecionada === "sorteios" ? "default" : "ghost"}
+              onClick={() => setAbaSelecionada("sorteios")}
+            >
+              🎲 Sorteios
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => (window.location.href = "/confrontos")}
+            >
+              ⚽ Confrontos
+            </Button>
           </div>
         </div>
 
@@ -128,6 +141,7 @@ export default function Home() {
           )}
 
           {abaSelecionada === "classificacao" && <TabelaClassificacao />}
+          {abaSelecionada === "sorteios" && <SorteiosHistorico />}
         </div>
 
         {/* Informações do regulamento */}
