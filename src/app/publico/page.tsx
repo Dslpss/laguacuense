@@ -5,7 +5,6 @@ import Image from "next/image";
 import { ListaTimesPublica } from "@/components/tournament/ListaTimesPublica";
 import { TabelaClassificacao } from "@/components/tournament/TabelaClassificacao";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -16,16 +15,60 @@ import {
 import { useTimes } from "@/hooks/useTimes";
 import { Trophy, Users, Calendar, BookOpen } from "lucide-react";
 import { useJogos } from "@/hooks/useJogos";
+import { useJogadoresPorIds } from "@/hooks/useJogadoresPorIds";
+
+import { useEffect } from "react";
+import { obterEventosJogo } from "@/lib/firebase/eventos";
+import { Jogador } from "@/types";
 
 export default function PaginaPublica() {
   const [abaSelecionada, setAbaSelecionada] = useState("times");
   const [regulamentoAberto, setRegulamentoAberto] = useState(false);
   const { times } = useTimes();
   const { jogos, carregando: carregandoJogos } = useJogos();
-  const timesMap = times.reduce((acc, t) => {
-    acc[t.id] = t;
-    return acc;
-  }, {});
+  const timesMap: Record<string, import("@/types").Time> = times.reduce(
+    (acc, t) => {
+      acc[t.id] = t;
+      return acc;
+    },
+    {} as Record<string, import("@/types").Time>
+  );
+
+  // Estado para eventos de todos os jogos
+  const [eventosJogos, setEventosJogos] = useState<
+    Record<string, import("@/lib/firebase/eventos").EventoJogo[]>
+  >({});
+
+  // Estado para todos os gols de todos os jogos
+  const [golsJogos, setGolsJogos] = useState<
+    Array<{ jogadorId: string; timeId: string }>
+  >([]);
+
+  useEffect(() => {
+    const unsubList: (() => void)[] = [];
+    let todosGols: Array<{ jogadorId: string; timeId: string }> = [];
+    jogos.forEach((jogo) => {
+      const unsub = obterEventosJogo(jogo.id, (evs) => {
+        setEventosJogos((prev) => ({ ...prev, [jogo.id]: evs }));
+        // Atualiza lista de gols global
+        const gols = evs.filter((ev) => ev.tipo === "gol");
+        todosGols = [
+          ...todosGols,
+          ...gols.map((g) => ({ jogadorId: g.jogadorId, timeId: g.timeId })),
+        ];
+        setGolsJogos(todosGols);
+      });
+      unsubList.push(unsub);
+    });
+    return () => {
+      unsubList.forEach((unsub) => unsub());
+    };
+  }, [jogos]);
+
+  // Buscar nomes dos jogadores de todos os gols
+  const jogadorIds = golsJogos.map((g) => g.jogadorId);
+  const timeIds = golsJogos.map((g) => g.timeId);
+  const jogadoresMap = useJogadoresPorIds(jogadorIds, timeIds);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
@@ -69,11 +112,13 @@ export default function PaginaPublica() {
           </div>
 
           {/* Título com gradiente premium */}
-          <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-white via-green-200 to-white bg-clip-text text-transparent drop-shadow-2xl">
-              ⚽ Campeonato Lagoacuense
+          <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight flex flex-col items-center justify-center">
+            <span className="flex items-center justify-center gap-2 drop-shadow-2xl">
+              <span className="text-6xl md:text-7xl text-black">⚽</span>
+              <span className="bg-gradient-to-r from-white via-green-200 to-white bg-clip-text text-transparent">
+                Campeonato Lagoacuense
+              </span>
             </span>
-            <br />
             <span className="bg-gradient-to-r from-green-300 via-green-100 to-green-300 bg-clip-text text-transparent">
               de Futebol 2025
             </span>
@@ -263,6 +308,9 @@ export default function PaginaPublica() {
                         else if (golsB > golsA) vencedor = timeB?.nome;
                         else vencedor = "Empate";
                       }
+                      // Eventos do jogo
+                      const eventos = eventosJogos[jogo.id] || [];
+                      const gols = eventos.filter((ev) => ev.tipo === "gol");
                       return (
                         <div
                           key={jogo.id}
@@ -313,6 +361,33 @@ export default function PaginaPublica() {
                                     ? "Empate"
                                     : `Vencedor: ${vencedor}`}
                                 </span>
+                              )}
+                              {/* Gols marcados */}
+                              {gols.length > 0 && (
+                                <div className="mt-3 text-xs text-blue-200 text-center">
+                                  <div className="font-bold mb-1">
+                                    Gols marcados:
+                                  </div>
+                                  <ul className="space-y-1">
+                                    {gols.map((gol) => (
+                                      <li key={gol.id}>
+                                        <span className="font-semibold">
+                                          {gol.timeId === timeA?.id
+                                            ? timeA?.nome
+                                            : timeB?.nome}
+                                        </span>{" "}
+                                        - Jogador:{" "}
+                                        <span className="font-bold">
+                                          {jogadoresMap[gol.jogadorId]?.nome ??
+                                            gol.jogadorId}
+                                        </span>
+                                        {gol.minuto !== undefined && (
+                                          <> ({gol.minuto}&apos;)</>
+                                        )}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
                               )}
                             </div>
                             <div className="flex-1 flex flex-col items-center">

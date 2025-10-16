@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Jogo } from "@/types";
 import { useTimes } from "@/hooks/useTimes";
-import { useJogadores } from "@/hooks/useJogadores";
+import { useJogadores } from "../../hooks/useJogadores";
 import { atualizarJogo, removerJogo } from "@/lib/firebase/firestore";
 import {
   adicionarEventoJogo,
@@ -63,11 +63,24 @@ export function ConfrontoEditor({ jogo }: Props) {
     return () => unsub();
   }, [jogo.id]);
 
+  const [salvando, setSalvando] = useState(false);
+  const [salvo, setSalvo] = useState(false);
+  const [erroSalvar, setErroSalvar] = useState<string | null>(null);
+
   const salvarPlacar = async () => {
-    await atualizarJogo(jogo.id, {
-      golsTimeA: Number(golsA),
-      golsTimeB: Number(golsB),
-    });
+    setSalvando(true);
+    setErroSalvar(null);
+    try {
+      await atualizarJogo(jogo.id, {
+        golsTimeA: Number(golsA),
+        golsTimeB: Number(golsB),
+      });
+      setSalvo(true);
+    } catch (err: any) {
+      setErroSalvar("Erro ao salvar placar");
+    } finally {
+      setSalvando(false);
+    }
   };
 
   const jogadoresDoLado = lado === "A" ? jogA : jogB;
@@ -132,6 +145,7 @@ export function ConfrontoEditor({ jogo }: Props) {
               min={0}
               value={golsA}
               onChange={(e) => setGolsA(Number(e.target.value))}
+              disabled={salvo}
             />
           </div>
           <div>
@@ -141,6 +155,7 @@ export function ConfrontoEditor({ jogo }: Props) {
               min={0}
               value={golsB}
               onChange={(e) => setGolsB(Number(e.target.value))}
+              disabled={salvo}
             />
           </div>
           <div className="md:col-span-2 text-sm text-gray-600">
@@ -151,9 +166,22 @@ export function ConfrontoEditor({ jogo }: Props) {
             <Button
               className="w-full bg-green-600 hover:bg-green-700"
               onClick={salvarPlacar}
+              disabled={salvando || salvo}
             >
-              Salvar placar
+              {salvando
+                ? "Salvando..."
+                : salvo
+                ? "Placar salvo"
+                : "Salvar placar"}
             </Button>
+            {erroSalvar && (
+              <div className="text-red-600 mt-2 text-sm">{erroSalvar}</div>
+            )}
+            {salvo && !erroSalvar && (
+              <div className="text-green-600 mt-2 text-sm">
+                Placar salvo com sucesso!
+              </div>
+            )}
           </div>
         </div>
 
@@ -220,51 +248,67 @@ export function ConfrontoEditor({ jogo }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-semibold mb-2">Eventos — {nomeTimeA}</h4>
-            <ul className="space-y-1 text-sm">
-              {eventos
-                .filter((e) => e.timeId === jogo.timeA)
-                .map((e) => (
-                  <li key={e.id} className="flex items-center justify-between">
-                    <span>
-                      {e.tipo.toUpperCase()} •{" "}
-                      {jogA.find(
-                        (j: { id: string; nome: string }) =>
-                          j.id === e.jogadorId
-                      )?.nome ?? e.jogadorId}
-                      {e.minuto ? ` (${e.minuto}')` : ""}
-                    </span>
-                    <Button variant="ghost" onClick={() => removerEvt(e.id)}>
-                      Remover
-                    </Button>
-                  </li>
-                ))}
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-2">Eventos — {nomeTimeB}</h4>
-            <ul className="space-y-1 text-sm">
-              {eventos
-                .filter((e) => e.timeId === jogo.timeB)
-                .map((e) => (
-                  <li key={e.id} className="flex items-center justify-between">
-                    <span>
-                      {e.tipo.toUpperCase()} •{" "}
-                      {jogB.find(
-                        (j: { id: string; nome: string }) =>
-                          j.id === e.jogadorId
-                      )?.nome ?? e.jogadorId}
-                      {e.minuto ? ` (${e.minuto}')` : ""}
-                    </span>
-                    <Button variant="ghost" onClick={() => removerEvt(e.id)}>
-                      Remover
-                    </Button>
-                  </li>
-                ))}
-            </ul>
-          </div>
+        <div className="mt-8">
+          <h4 className="font-semibold mb-3 text-lg">
+            Todos os eventos do confronto
+          </h4>
+          <ul className="space-y-2 text-sm">
+            {eventos.length === 0 ? (
+              <li className="text-gray-400">Nenhum evento adicionado ainda.</li>
+            ) : (
+              eventos
+                .sort((a, b) => (a.minuto ?? 0) - (b.minuto ?? 0))
+                .map((e) => {
+                  const jogador = [...jogA, ...jogB].find(
+                    (j) => j.id === e.jogadorId
+                  );
+                  const timeNome =
+                    e.timeId === jogo.timeA ? nomeTimeA : nomeTimeB;
+                  let tipoLabel = "";
+                  if (e.tipo === "gol") tipoLabel = "Gol";
+                  else if (e.tipo === "amarelo") tipoLabel = "Cartão amarelo";
+                  else if (e.tipo === "vermelho") tipoLabel = "Cartão vermelho";
+                  return (
+                    <li
+                      key={e.id}
+                      className="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-2"
+                    >
+                      <span>
+                        <span
+                          className={`font-bold mr-2 ${
+                            e.tipo === "gol"
+                              ? "text-green-400"
+                              : e.tipo === "amarelo"
+                              ? "text-yellow-400"
+                              : "text-red-400"
+                          }`}
+                        >
+                          {tipoLabel}
+                        </span>
+                        <span className="font-medium text-white">
+                          {jogador?.nome ?? e.jogadorId}
+                        </span>
+                        {e.minuto ? (
+                          <span className="ml-2 text-blue-300">
+                            ({e.minuto}&#39;)
+                          </span>
+                        ) : null}
+                        <span className="ml-2 text-xs text-gray-400">
+                          [{timeNome}]
+                        </span>
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removerEvt(e.id)}
+                      >
+                        Remover
+                      </Button>
+                    </li>
+                  );
+                })
+            )}
+          </ul>
         </div>
       </CardContent>
     </Card>

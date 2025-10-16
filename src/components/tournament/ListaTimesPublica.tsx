@@ -2,13 +2,7 @@
 
 import { useTimes } from "@/hooks/useTimes";
 import Image from "next/image";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ListaTimesPublica() {
   const { times, carregando, erro } = useTimes();
