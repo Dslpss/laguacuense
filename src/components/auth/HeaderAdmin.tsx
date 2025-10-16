@@ -19,26 +19,28 @@ export function HeaderAdmin() {
   if (!usuario) return null;
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="bg-primary border-b-4 border-accent shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-16 py-3 sm:py-0 gap-2 sm:gap-0">
           <div className="flex items-center">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-lg sm:text-xl font-semibold text-primary-foreground drop-shadow text-center sm:text-left">
               Painel Administrativo
             </h1>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <User className="h-4 w-4" />
-              <span>{usuario.email}</span>
+          <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-center">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-primary-foreground">
+              <User className="h-4 w-4 shrink-0" />
+              <span className="truncate max-w-[150px] sm:max-w-none">
+                {usuario.email}
+              </span>
             </div>
 
             <Button
               variant="outline"
               size="sm"
               onClick={handleLogout}
-              className="flex items-center space-x-2"
+              className="flex items-center gap-2 border-accent bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground"
             >
               <LogOut className="h-4 w-4" />
               <span>Sair</span>

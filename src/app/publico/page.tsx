@@ -1,79 +1,223 @@
 "use client";
 
 import { useState } from "react";
-import { ListaTimes } from "@/components/tournament/ListaTimes";
+import Image from "next/image";
+import { ListaTimesPublica } from "@/components/tournament/ListaTimesPublica";
 import { TabelaClassificacao } from "@/components/tournament/TabelaClassificacao";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useTimes } from "@/hooks/useTimes";
-import { Trophy, Users, Calendar } from "lucide-react";
+import { Trophy, Users, Calendar, BookOpen } from "lucide-react";
+import { useJogos } from "@/hooks/useJogos";
 
 export default function PaginaPublica() {
   const [abaSelecionada, setAbaSelecionada] = useState("times");
+  const [regulamentoAberto, setRegulamentoAberto] = useState(false);
   const { times } = useTimes();
+  const { jogos, carregando: carregandoJogos } = useJogos();
+  const timesMap = times.reduce((acc, t) => {
+    acc[t.id] = t;
+    return acc;
+  }, {});
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <div className="container mx-auto py-8 px-4">
-        {/* Header Público */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Trophy className="h-12 w-12 text-yellow-600" />
-            <Users className="h-12 w-12 text-green-600" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <pattern
+            id="grid"
+            width="40"
+            height="40"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M 40 0 L 0 0 0 40"
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+            />
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+      </div>
+
+      <div className="relative container mx-auto py-12 px-4">
+        {/* Header Público Profissional */}
+        <div className="text-center mb-12">
+          {/* Ícones com efeito de brilho */}
+          <div className="flex items-center justify-center gap-6 mb-6">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-yellow-500 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div className="relative bg-gradient-to-br from-yellow-400 to-yellow-600 p-4 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-transform">
+                <Trophy className="h-12 w-12 text-white" />
+              </div>
+            </div>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-green-500 rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div className="relative bg-gradient-to-br from-green-500 to-green-700 p-4 rounded-2xl shadow-2xl transform group-hover:scale-110 transition-transform">
+                <Users className="h-12 w-12 text-white" />
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-4xl font-bold text-green-800 mb-4">
-            ⚽ Campeonato Lagoacuense de Futebol 2025
+          {/* Título com gradiente premium */}
+          <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-white via-green-200 to-white bg-clip-text text-transparent drop-shadow-2xl">
+              ⚽ Campeonato Lagoacuense
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-green-300 via-green-100 to-green-300 bg-clip-text text-transparent">
+              de Futebol 2025
+            </span>
           </h1>
 
-          <p className="text-lg text-gray-600 mb-6">
-            Acompanhe os times, grupos e classificações do torneio
+          <p className="text-xl md:text-2xl text-green-100 font-light mb-10 max-w-2xl mx-auto">
+            Acompanhe os times, grupos e classificações do maior torneio da
+            região
           </p>
 
-          {/* Informações do campeonato */}
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            <Badge
-              variant="secondary"
-              className="text-sm flex items-center gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Data: 27/09/2025 às 15:30min
-            </Badge>
-            <Badge variant="outline" className="text-sm">
-              16 equipes em 4 grupos
-            </Badge>
-            <Badge variant="outline" className="text-sm">
-              Times inscritos: {times.length}/16
-            </Badge>
+          {/* Cards de informações premium */}
+          <div className="flex flex-wrap justify-center gap-4 mb-10">
+            <div className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-6 py-3 hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-green-300" />
+                <div className="text-left">
+                  <p className="text-xs text-green-200 font-medium">
+                    Data de Início
+                  </p>
+                  <p className="text-white font-bold">27/09/2025 às 15:30</p>
+                </div>
+              </div>
+            </div>
+            <div className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-6 py-3 hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl">
+              <div className="flex items-center gap-3">
+                <svg
+                  className="h-5 w-5 text-yellow-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                <div className="text-left">
+                  <p className="text-xs text-yellow-200 font-medium">Formato</p>
+                  <p className="text-white font-bold">16 equipes em 4 grupos</p>
+                </div>
+              </div>
+            </div>
+            <div className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-6 py-3 hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl">
+              <div className="flex items-center gap-3">
+                <svg
+                  className="h-5 w-5 text-blue-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div className="text-left">
+                  <p className="text-xs text-blue-200 font-medium">
+                    Inscrições
+                  </p>
+                  <p className="text-white font-bold">
+                    {times.length}/16 times
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-sm mb-6 max-w-2xl mx-auto">
-            <h3 className="font-semibold mb-2">
-              📋 Critérios de Classificação (Art. 46º)
-            </h3>
-            <p className="text-sm text-gray-600 text-left">
-              1. Maior número de pontos • 2. Vitórias • 3. Saldo de gols • 4.
-              Maior número de gols marcados • 5. Menor número de gols sofridos •
-              6. Derrotas • 7. Cartões vermelhos • 8. Cartões amarelos • 9.
-              Sorteio
-            </p>
-          </div>
+          {/* Botão de regulamento premium */}
+          <Button
+            size="lg"
+            onClick={() => setRegulamentoAberto(true)}
+            className="h-14 px-8 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-2xl hover:shadow-green-500/50 transition-all border-2 border-green-400/30 hover:scale-105"
+          >
+            <BookOpen className="h-6 w-6 mr-2" />
+            <span className="text-lg font-bold">Ver Regulamento Completo</span>
+          </Button>
         </div>
 
-        {/* Navegação por abas */}
-        <div className="flex justify-center mb-8">
-          <div className="flex gap-2 p-1 bg-white rounded-lg shadow-sm">
+        {/* Navegação por abas premium */}
+        <div className="flex justify-center mb-10">
+          <div className="flex gap-3 p-2 bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20">
             <Button
               variant={abaSelecionada === "times" ? "default" : "ghost"}
               onClick={() => setAbaSelecionada("times")}
+              className={
+                abaSelecionada === "times"
+                  ? "h-12 px-6 bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:shadow-xl"
+                  : "h-12 px-6 text-white hover:bg-white/10"
+              }
             >
-              📋 Times e Grupos
+              <svg
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
+              </svg>
+              Times e Grupos
             </Button>
             <Button
               variant={abaSelecionada === "classificacao" ? "default" : "ghost"}
               onClick={() => setAbaSelecionada("classificacao")}
+              className={
+                abaSelecionada === "classificacao"
+                  ? "h-12 px-6 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-lg hover:shadow-xl"
+                  : "h-12 px-6 text-white hover:bg-white/10"
+              }
             >
-              🏆 Classificação
+              <Trophy className="h-5 w-5 mr-2" />
+              Classificação
+            </Button>
+            <Button
+              variant={abaSelecionada === "confrontos" ? "default" : "ghost"}
+              onClick={() => setAbaSelecionada("confrontos")}
+              className={
+                abaSelecionada === "confrontos"
+                  ? "h-12 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:shadow-xl"
+                  : "h-12 px-6 text-white hover:bg-white/10"
+              }
+            >
+              <svg
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              Confrontos
             </Button>
           </div>
         </div>
@@ -81,8 +225,8 @@ export default function PaginaPublica() {
         {/* Conteúdo das abas */}
         <div className="space-y-6">
           {abaSelecionada === "times" && (
-            <div className="max-w-4xl mx-auto">
-              <ListaTimes />
+            <div className="max-w-7xl mx-auto">
+              <ListaTimesPublica />
             </div>
           )}
 
@@ -91,16 +235,355 @@ export default function PaginaPublica() {
               <TabelaClassificacao />
             </div>
           )}
+
+          {abaSelecionada === "confrontos" && (
+            <div className="max-w-5xl mx-auto">
+              <div className="space-y-6">
+                <h2 className="text-3xl font-bold text-blue-300 mb-4 text-center">
+                  Confrontos
+                </h2>
+                {carregandoJogos ? (
+                  <p className="text-center text-muted-foreground">
+                    Carregando confrontos...
+                  </p>
+                ) : jogos.length === 0 ? (
+                  <p className="text-center text-gray-400">
+                    Nenhum confronto cadastrado ainda.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {jogos.map((jogo) => {
+                      const timeA = timesMap[jogo.timeA];
+                      const timeB = timesMap[jogo.timeB];
+                      const golsA = jogo.golsTimeA ?? 0;
+                      const golsB = jogo.golsTimeB ?? 0;
+                      let vencedor = null;
+                      if (jogo.finalizado) {
+                        if (golsA > golsB) vencedor = timeA?.nome;
+                        else if (golsB > golsA) vencedor = timeB?.nome;
+                        else vencedor = "Empate";
+                      }
+                      return (
+                        <div
+                          key={jogo.id}
+                          className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl p-6 shadow-xl border border-blue-900/40"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm text-blue-200 font-semibold">
+                              {jogo.fase === "grupos"
+                                ? `Grupo ${jogo.grupo}`
+                                : jogo.fase.charAt(0).toUpperCase() +
+                                  jogo.fase.slice(1)}
+                            </span>
+                            <span className="text-xs text-blue-400">
+                              {jogo.dataJogo
+                                ?.toDate?.()
+                                .toLocaleString?.("pt-BR")}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex-1 flex flex-col items-center">
+                              <span className="text-lg font-bold text-blue-100">
+                                {timeA?.nome ?? "Time A"}
+                              </span>
+                              {timeA?.logoUrl && (
+                                <Image
+                                  src={timeA.logoUrl}
+                                  alt={timeA.nome}
+                                  width={48}
+                                  height={48}
+                                  className="w-12 h-12 rounded-full object-cover mt-2"
+                                />
+                              )}
+                            </div>
+                            <div className="flex flex-col items-center justify-center">
+                              <span className="text-2xl font-black text-white">
+                                {golsA} <span className="text-blue-400">x</span>{" "}
+                                {golsB}
+                              </span>
+                              {jogo.finalizado && (
+                                <span
+                                  className={`mt-2 px-3 py-1 rounded-full text-xs font-bold ${
+                                    vencedor === "Empate"
+                                      ? "bg-gray-700 text-gray-200"
+                                      : "bg-blue-700 text-white"
+                                  }`}
+                                >
+                                  {vencedor === "Empate"
+                                    ? "Empate"
+                                    : `Vencedor: ${vencedor}`}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex-1 flex flex-col items-center">
+                              <span className="text-lg font-bold text-blue-100">
+                                {timeB?.nome ?? "Time B"}
+                              </span>
+                              {timeB?.logoUrl && (
+                                <Image
+                                  src={timeB.logoUrl}
+                                  alt={timeB.nome}
+                                  width={48}
+                                  height={48}
+                                  className="w-12 h-12 rounded-full object-cover mt-2"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Footer */}
-        <div className="text-center mt-12 pt-8 border-t border-gray-200">
-          <div className="text-gray-500 text-sm space-y-2">
-            <p className="font-semibold">Liga Esportiva Lagoacuense</p>
-            <p>Diretor de Esportes: Christiano Texeira dos Santos</p>
-            <p className="text-xs">
-              Sistema desenvolvido para gestão do Campeonato Lagoacuense 2025
-            </p>
+        {/* Modal do Regulamento */}
+        <Dialog open={regulamentoAberto} onOpenChange={setRegulamentoAberto}>
+          <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto bg-gradient-to-br from-white to-green-50 border-2 border-green-200 shadow-2xl">
+            <DialogHeader className="space-y-3 pb-6 border-b border-green-200">
+              <div className="flex items-center justify-center gap-3">
+                <div className="bg-gradient-to-br from-green-600 to-green-700 p-3 rounded-full shadow-lg">
+                  <svg
+                    className="h-8 w-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <DialogTitle className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-green-700 to-green-900 bg-clip-text text-transparent">
+                📖 Regulamento Oficial
+              </DialogTitle>
+              <DialogDescription className="text-center text-base text-gray-700 font-medium">
+                Artigo 46º - Critérios de Classificação e Desempate
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6 px-2">
+              {/* Critérios de Desempate */}
+              <div className="space-y-4 bg-white p-6 rounded-xl shadow-md border border-green-100 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-lg shadow">
+                    <svg
+                      className="h-6 w-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="font-bold text-lg sm:text-xl text-gray-800">
+                    Critérios de Desempate
+                  </h4>
+                </div>
+                <ol className="space-y-3 text-gray-700">
+                  <li className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <span className="bg-blue-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0 text-sm">
+                      1
+                    </span>
+                    <span className="font-medium pt-0.5">
+                      Maior número de pontos
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <span className="bg-blue-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0 text-sm">
+                      2
+                    </span>
+                    <span className="font-medium pt-0.5">Vitórias</span>
+                  </li>
+                  <li className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <span className="bg-blue-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0 text-sm">
+                      3
+                    </span>
+                    <span className="font-medium pt-0.5">Saldo de gols</span>
+                  </li>
+                  <li className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <span className="bg-blue-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0 text-sm">
+                      4
+                    </span>
+                    <span className="font-medium pt-0.5">
+                      Maior número de gols marcados
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <span className="bg-blue-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0 text-sm">
+                      5
+                    </span>
+                    <span className="font-medium pt-0.5">
+                      Menor número de gols sofridos
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <span className="bg-blue-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0 text-sm">
+                      6
+                    </span>
+                    <span className="font-medium pt-0.5">Derrotas</span>
+                  </li>
+                  <li className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <span className="bg-blue-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0 text-sm">
+                      7
+                    </span>
+                    <span className="font-medium pt-0.5">
+                      Cartões vermelhos
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <span className="bg-blue-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0 text-sm">
+                      8
+                    </span>
+                    <span className="font-medium pt-0.5">Cartões amarelos</span>
+                  </li>
+                  <li className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                    <span className="bg-blue-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0 text-sm">
+                      9
+                    </span>
+                    <span className="font-medium pt-0.5">Sorteio</span>
+                  </li>
+                </ol>
+              </div>
+
+              {/* Informações Gerais */}
+              <div className="space-y-4 bg-white p-6 rounded-xl shadow-md border border-green-100 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-lg shadow">
+                    <svg
+                      className="h-6 w-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="font-bold text-lg sm:text-xl text-gray-800">
+                    Informações Gerais
+                  </h4>
+                </div>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+                    <span className="text-green-600 font-bold text-xl shrink-0">
+                      ⚽
+                    </span>
+                    <span className="font-medium pt-0.5">
+                      16 times distribuídos em 4 grupos (A, B, C, D)
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+                    <span className="text-green-600 font-bold text-xl shrink-0">
+                      🏆
+                    </span>
+                    <span className="font-medium pt-0.5">
+                      Os 2 melhores de cada grupo se classificam
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+                    <span className="text-green-600 font-bold text-xl shrink-0">
+                      🎲
+                    </span>
+                    <span className="font-medium pt-0.5">
+                      Semifinais definidas por sorteio
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+                    <span className="text-green-600 font-bold text-xl shrink-0">
+                      ⏱️
+                    </span>
+                    <span className="font-medium pt-0.5">
+                      Tolerância de 15 minutos para início dos jogos
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-br from-green-100 to-blue-100 border border-green-300">
+                    <span className="text-blue-600 font-bold text-xl shrink-0">
+                      👤
+                    </span>
+                    <span className="font-semibold pt-0.5">
+                      Diretor: Christiano Texeira dos Santos
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Footer do Modal */}
+            <div className="mt-6 pt-6 border-t border-green-200 text-center">
+              <p className="text-sm text-gray-600 font-medium">
+                📋 Regulamento oficial do Campeonato Lagoacuense de Futebol 2025
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Footer Premium */}
+        <div className="mt-16 pt-12 border-t border-white/20">
+          <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/10">
+            <div className="flex justify-center mb-6">
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+                <Image
+                  src="/SECRETARIAS.zip - 17.png"
+                  alt="Liga Esportiva Lagoacuense - Diretor de Esportes: Christiano Texeira dos Santos"
+                  width={450}
+                  height={75}
+                  className="object-contain max-w-full h-auto"
+                />
+              </div>
+            </div>
+            <div className="text-center space-y-3">
+              <p className="text-white font-bold text-lg">
+                Liga Esportiva Lagoacuense
+              </p>
+              <p className="text-green-200 font-medium">
+                Diretor de Esportes:{" "}
+                <span className="text-white">
+                  Christiano Texeira dos Santos
+                </span>
+              </p>
+              <p className="text-green-300/80 text-sm max-w-md mx-auto">
+                Sistema desenvolvido para gestão e acompanhamento do Campeonato
+                Lagoacuense 2025
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => (window.location.href = "/login")}
+                className="mt-4 text-sm text-green-300 hover:text-white hover:bg-white/10 border border-white/20"
+              >
+                <svg
+                  className="h-4 w-4 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+                Área Administrativa
+              </Button>
+            </div>
           </div>
         </div>
       </div>

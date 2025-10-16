@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { Jogador } from "@/types";
 import { obterJogadores } from "@/lib/firebase/firestore";
 
+/**
+ * Hook para obter jogadores de um time específico
+ */
 export function useJogadores(timeId?: string) {
   const [jogadores, setJogadores] = useState<Jogador[]>([]);
   const [carregando, setCarregando] = useState(false);

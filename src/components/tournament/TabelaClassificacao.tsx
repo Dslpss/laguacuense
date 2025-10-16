@@ -59,85 +59,107 @@ export function TabelaClassificacao() {
                     <Badge variant="secondary">Grupo {grupo}</Badge>
                   </div>
 
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-8">#</TableHead>
-                        <TableHead>Time</TableHead>
-                        <TableHead className="text-center">P</TableHead>
-                        <TableHead className="text-center">J</TableHead>
-                        <TableHead className="text-center">V</TableHead>
-                        <TableHead className="text-center">E</TableHead>
-                        <TableHead className="text-center">D</TableHead>
-                        <TableHead className="text-center">GM</TableHead>
-                        <TableHead className="text-center">GS</TableHead>
-                        <TableHead className="text-center">SG</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {timesDoGrupo.map((time, index) => (
-                        <TableRow key={time.timeId}>
-                          <TableCell className="font-medium">
-                            {index + 1}
-                            {index < 2 && (
-                              <Badge variant="outline" className="ml-1">
-                                Q
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {time.nomeTime}
-                          </TableCell>
-                          <TableCell className="text-center font-bold">
-                            {time.pontos}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {time.jogos}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {time.vitorias}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {time.empates}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {time.derrotas}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {time.golsMarcados}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {time.golsSofridos}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span
-                              className={
-                                time.saldoGols >= 0
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }
-                            >
-                              {time.saldoGols > 0 ? "+" : ""}
-                              {time.saldoGols}
-                            </span>
-                          </TableCell>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-8 sticky left-0 bg-background">
+                            #
+                          </TableHead>
+                          <TableHead className="sticky left-8 bg-background min-w-[120px]">
+                            Time
+                          </TableHead>
+                          <TableHead className="text-center">P</TableHead>
+                          <TableHead className="text-center hidden sm:table-cell">
+                            J
+                          </TableHead>
+                          <TableHead className="text-center">V</TableHead>
+                          <TableHead className="text-center hidden sm:table-cell">
+                            E
+                          </TableHead>
+                          <TableHead className="text-center hidden sm:table-cell">
+                            D
+                          </TableHead>
+                          <TableHead className="text-center hidden md:table-cell">
+                            GM
+                          </TableHead>
+                          <TableHead className="text-center hidden md:table-cell">
+                            GS
+                          </TableHead>
+                          <TableHead className="text-center">SG</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {timesDoGrupo.map((time, index) => (
+                          <TableRow key={time.timeId}>
+                            <TableCell className="font-medium sticky left-0 bg-background">
+                              {index + 1}
+                              {index < 2 && (
+                                <Badge
+                                  variant="outline"
+                                  className="ml-1 text-xs"
+                                >
+                                  Q
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="font-medium sticky left-8 bg-background">
+                              {time.nomeTime}
+                            </TableCell>
+                            <TableCell className="text-center font-bold">
+                              {time.pontos}
+                            </TableCell>
+                            <TableCell className="text-center hidden sm:table-cell">
+                              {time.jogos}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {time.vitorias}
+                            </TableCell>
+                            <TableCell className="text-center hidden sm:table-cell">
+                              {time.empates}
+                            </TableCell>
+                            <TableCell className="text-center hidden sm:table-cell">
+                              {time.derrotas}
+                            </TableCell>
+                            <TableCell className="text-center hidden md:table-cell">
+                              {time.golsMarcados}
+                            </TableCell>
+                            <TableCell className="text-center hidden md:table-cell">
+                              {time.golsSofridos}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <span
+                                className={
+                                  time.saldoGols >= 0
+                                    ? "text-green-600 font-semibold"
+                                    : "text-red-600 font-semibold"
+                                }
+                              >
+                                {time.saldoGols > 0 ? "+" : ""}
+                                {time.saldoGols}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-4 text-sm text-muted-foreground">
+          <div className="mt-4 text-xs sm:text-sm text-muted-foreground space-y-2">
             <p>
               <strong>Legenda:</strong> P = Pontos, J = Jogos, V = Vitórias, E =
-              Empates, D = Derrotas
+              Empates, D = Derrotas, GM = Gols Marcados, GS = Gols Sofridos, SG
+              = Saldo de Gols, Q = Qualificado
             </p>
-            <p>
-              GM = Gols Marcados, GS = Gols Sofridos, SG = Saldo de Gols, Q =
-              Qualificado
+            <p className="text-xs">
+              <em>
+                Nota: Em telas pequenas, algumas colunas ficam ocultas. Role
+                horizontalmente para ver todas.
+              </em>
             </p>
             <p className="mt-2">
               <strong>Critérios de desempate:</strong> 1º Pontos, 2º Vitórias,

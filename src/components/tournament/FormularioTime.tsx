@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { adicionarTime } from "@/lib/firebase/firestore";
+import { uploadLogo } from "@/lib/firebase/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +26,7 @@ export function FormularioTime() {
   const [nome, setNome] = useState("");
   const [cidade, setCidade] = useState("");
   const [grupo, setGrupo] = useState<"A" | "B" | "C" | "D" | "">("");
+  const [logo, setLogo] = useState<File | null>(null);
   const [carregando, setCarregando] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,16 +40,33 @@ export function FormularioTime() {
     setCarregando(true);
 
     try {
-      await adicionarTime({
-        nome: nome.trim(),
-        cidade: cidade.trim(),
-        ...(grupo ? { grupo } : {}),
-      });
+      let logoUrl = "";
+      if (logo) {
+        // Upload real para Firebase Storage
+        // O id do time só existe após adicionar, então salva sem logo, depois atualiza
+        const novoTime = {
+          nome: nome.trim(),
+          cidade: cidade.trim(),
+          ...(grupo ? { grupo } : {}),
+        };
+        const timeId = await adicionarTime(novoTime);
+        logoUrl = await uploadLogo(logo, timeId);
+        // Atualiza o time com a URL da logo
+        const { atualizarTime } = await import("@/lib/firebase/firestore");
+        await atualizarTime(timeId, { logoUrl });
+      } else {
+        await adicionarTime({
+          nome: nome.trim(),
+          cidade: cidade.trim(),
+          ...(grupo ? { grupo } : {}),
+        });
+      }
 
       // Limpa o formulário
       setNome("");
       setCidade("");
       setGrupo("");
+      setLogo(null);
 
       alert("Time adicionado com sucesso!");
     } catch (error) {
@@ -67,6 +87,38 @@ export function FormularioTime() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="logo">Logo do Time (opcional)</Label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <Input
+                id="logo"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setLogo(e.target.files[0]);
+                  } else {
+                    setLogo(null);
+                  }
+                }}
+                disabled={carregando}
+                className="flex-1"
+              />
+              {logo && (
+                <div className="shrink-0">
+                  <Image
+                    src={URL.createObjectURL(logo)}
+                    alt="Prévia da logo"
+                    width={64}
+                    height={64}
+                    className="object-contain rounded border bg-white"
+                    style={{ maxWidth: "64px", maxHeight: "64px" }}
+                    unoptimized
+                  />
+                </div>
+              )}
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="nome">Nome do Time</Label>
             <Input

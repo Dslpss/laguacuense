@@ -5,6 +5,7 @@ export interface Time {
   nome: string;
   cidade: string;
   grupo?: "A" | "B" | "C" | "D";
+  logoUrl?: string;
   criadoEm: Timestamp;
 }
 
