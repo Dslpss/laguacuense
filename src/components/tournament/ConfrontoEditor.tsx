@@ -76,7 +76,7 @@ export function ConfrontoEditor({ jogo }: Props) {
         golsTimeB: Number(golsB),
       });
       setSalvo(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErroSalvar("Erro ao salvar placar");
     } finally {
       setSalvando(false);
