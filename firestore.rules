@@ -1,0 +1,231 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Regras para usuários
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Regras para preferências do usuário
+    match /userPreferences/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Regras para jogadores
+    match /players/{playerId} {
+      allow read, write: if request.auth != null 
+        && resource.data.userId == request.auth.uid;
+      
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && validatePlayerData(request.resource.data);
+    }
+    
+    // Regras para times
+    match /teams/{teamId} {
+      allow read, write: if request.auth != null 
+        && resource.data.userId == request.auth.uid;
+      
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && validateTeamData(request.resource.data);
+    }
+    
+    // Regras para campeonatos
+    match /championships/{championshipId} {
+      allow read, write: if request.auth != null 
+        && resource.data.userId == request.auth.uid;
+      
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && validateChampionshipData(request.resource.data);
+    }
+    
+    // Regras para resultados de jogos
+    match /gameResults/{gameId} {
+      allow read, write: if request.auth != null 
+        && resource.data.userId == request.auth.uid;
+      
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && validateGameResultData(request.resource.data);
+    }
+    
+    // Regras para distribuições salvas
+    match /savedDistributions/{distributionId} {
+      allow read, write: if request.auth != null 
+        && resource.data.userId == request.auth.uid;
+      
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && validateDistributionData(request.resource.data);
+    }
+    
+    // ========== NOVAS REGRAS PARA CAMPEONATO LAGOACUENSE ==========
+    
+    // Regras para times do Campeonato Lagoacuense
+    match /times/{timeId} {
+      // Leitura pública para todos os times
+      allow read: if true;
+      
+      // Escrita apenas para usuários autenticados (administradores)
+      allow write: if request.auth != null;
+      
+      // Validação na criação
+      allow create: if request.auth != null 
+        && validateCampeonatoTimeData(request.resource.data);
+        
+      // Subcoleção de jogadores
+      match /jogadores/{jogadorId} {
+        // Leitura pública
+        allow read: if true;
+        
+        // Escrita apenas para administradores
+        allow write: if request.auth != null;
+        
+        allow create: if request.auth != null 
+          && validateJogadorData(request.resource.data);
+      }
+    }
+    
+    // Regras para jogos do campeonato
+    match /jogos/{jogoId} {
+      // Leitura pública para acompanhar resultados
+      allow read: if true;
+      
+      // Escrita apenas para administradores
+      allow write: if request.auth != null;
+      
+      allow create: if request.auth != null 
+        && validateJogoData(request.resource.data);
+    }
+    
+    // Regras para sorteios
+    match /sorteios/{sorteioId} {
+      // Leitura pública para transparência
+      allow read: if true;
+      
+      // Escrita apenas para administradores
+      allow write: if request.auth != null;
+      
+      allow create: if request.auth != null 
+        && validateSorteioData(request.resource.data);
+    }
+    
+    // ============================================================
+    
+    // Teste de conectividade
+    match /_health_check_/{document} {
+      allow read: if request.auth != null;
+    }
+    
+    match /_connectivity_test_/{document} {
+      allow read: if request.auth != null;
+    }
+  }
+  
+  // Funções de validação existentes
+  function validatePlayerData(data) {
+    return data.keys().hasAll(['name', 'skill', 'position', 'userId'])
+      && data.name is string
+      && data.skill is number
+      && data.position is string
+      && data.userId is string
+      && data.name.size() > 0
+      && data.skill >= 1 && data.skill <= 10;
+  }
+  
+  function validateTeamData(data) {
+    return data.keys().hasAll(['name', 'color', 'userId'])
+      && data.name is string
+      && data.color is string
+      && data.userId is string
+      && data.name.size() > 0;
+  }
+  
+  function validateChampionshipData(data) {
+    return data.keys().hasAll(['name', 'type', 'status', 'userId'])
+      && data.name is string
+      && data.type is string
+      && data.status is string
+      && data.userId is string
+      && data.name.size() > 0
+      && data.type in ['pontos_corridos', 'mata_mata', 'grupos']
+      && data.status in ['criado', 'em_andamento', 'finalizado'];
+  }
+  
+  function validateGameResultData(data) {
+    return data.keys().hasAll(['timeA', 'timeB', 'placarA', 'placarB', 'userId'])
+      && data.timeA is string
+      && data.timeB is string
+      && data.placarA is number
+      && data.placarB is number
+      && data.userId is string
+      && data.placarA >= 0
+      && data.placarB >= 0;
+  }
+  
+  function validateDistributionData(data) {
+    return data.keys().hasAll(['name', 'date', 'userId'])
+      && data.name is string
+      && data.date is string
+      && data.userId is string
+      && data.name.size() > 0;
+  }
+  
+  // ========== NOVAS FUNÇÕES DE VALIDAÇÃO ==========
+  
+  // Validação para times do campeonato
+  function validateCampeonatoTimeData(data) {
+    return data.keys().hasAll(['nome', 'cidade', 'criadoEm'])
+      && data.nome is string
+      && data.cidade is string
+      && data.criadoEm is timestamp
+      && data.nome.size() > 0
+      && data.cidade.size() > 0
+      && (!data.keys().hasAny(['grupo']) || data.grupo in ['A', 'B', 'C', 'D']);
+  }
+  
+  // Validação para jogadores
+  function validateJogadorData(data) {
+    return data.keys().hasAll(['nome', 'posicao', 'numero', 'criadoEm'])
+      && data.nome is string
+      && data.posicao is string
+      && data.numero is number
+      && data.criadoEm is timestamp
+      && data.nome.size() > 0
+      && data.posicao.size() > 0
+      && data.numero > 0
+      && (!data.keys().hasAny(['idade']) || (data.idade is number && data.idade > 0));
+  }
+  
+  // Validação para jogos
+  function validateJogoData(data) {
+    return data.keys().hasAll(['timeA', 'timeB', 'fase', 'dataJogo', 'finalizado', 'criadoEm'])
+      && data.timeA is string
+      && data.timeB is string
+      && data.fase is string
+      && data.dataJogo is timestamp
+      && data.finalizado is bool
+      && data.criadoEm is timestamp
+      && data.timeA.size() > 0
+      && data.timeB.size() > 0
+      && data.fase in ['grupos', 'semifinal', 'final']
+      && (!data.keys().hasAny(['grupo']) || data.grupo in ['A', 'B', 'C', 'D'])
+      && (!data.keys().hasAny(['golsTimeA']) || (data.golsTimeA is number && data.golsTimeA >= 0))
+      && (!data.keys().hasAny(['golsTimeB']) || (data.golsTimeB is number && data.golsTimeB >= 0))
+      && (!data.keys().hasAny(['cartoesAmarelosTimeA']) || (data.cartoesAmarelosTimeA is number && data.cartoesAmarelosTimeA >= 0))
+      && (!data.keys().hasAny(['cartoesVermelhoTimeA']) || (data.cartoesVermelhoTimeA is number && data.cartoesVermelhoTimeA >= 0))
+      && (!data.keys().hasAny(['cartoesAmarelosTimeB']) || (data.cartoesAmarelosTimeB is number && data.cartoesAmarelosTimeB >= 0))
+      && (!data.keys().hasAny(['cartoesVermelhoTimeB']) || (data.cartoesVermelhoTimeB is number && data.cartoesVermelhoTimeB >= 0));
+  }
+  
+  // Validação para sorteios
+  function validateSorteioData(data) {
+    return data.keys().hasAll(['tipo', 'criadoEm'])
+      && data.tipo is string
+      && data.criadoEm is timestamp
+      && data.tipo in ['grupos', 'semifinais'];
+  }
+}
