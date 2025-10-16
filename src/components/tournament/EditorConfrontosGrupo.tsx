@@ -22,8 +22,9 @@ type Par = { a?: string; b?: string; data?: string };
 export function EditorConfrontosGrupo() {
   const { times } = useTimes();
   const [grupo, setGrupo] = useState<(typeof GRUPOS)[number] | "">("");
-  const [confrontos, setConfrontos] = useState<Par[]>([{}, {}, {}, {}]);
+  const [confrontos, setConfrontos] = useState<Par[]>([{}, {}]); // Inicia com 2 confrontos
   const [salvando, setSalvando] = useState(false);
+  const [idaVolta, setIdaVolta] = useState<"ida" | "ida-volta">("ida");
 
   const timesDoGrupo = useMemo(
     () => times.filter((t) => t.grupo === grupo),
@@ -50,21 +51,42 @@ export function EditorConfrontosGrupo() {
       for (const p of confrontos) {
         if (!p.a || !p.b) continue;
         const data = p.data ? new Date(p.data) : new Date();
-        const payload: Omit<Jogo, "id"> = {
+
+        // Jogo de ida
+        const payloadIda: Omit<Jogo, "id"> = {
           timeA: p.a,
           timeB: p.b,
           fase: "grupos",
           grupo: grupo as (typeof GRUPOS)[number],
           dataJogo: Timestamp.fromDate(data),
           finalizado: false,
-          criadoEm: Timestamp.fromDate(new Date()), // será sobrescrito no backend com now(), mas mantém o tipo
+          criadoEm: Timestamp.fromDate(new Date()),
         } as Omit<Jogo, "id">;
+        await adicionarJogo(payloadIda);
 
-        // adicionarJogo ignora 'criadoEm' e seta server-side; passamos para satisfazer o tipo local
-        await adicionarJogo(payload);
+        // Se for ida e volta, cria o jogo de volta (invertendo os times)
+        if (idaVolta === "ida-volta") {
+          const dataVolta = p.data ? new Date(p.data) : new Date();
+          dataVolta.setDate(dataVolta.getDate() + 7); // Uma semana depois por padrão
+
+          const payloadVolta: Omit<Jogo, "id"> = {
+            timeA: p.b, // Inverte os times
+            timeB: p.a,
+            fase: "grupos",
+            grupo: grupo as (typeof GRUPOS)[number],
+            dataJogo: Timestamp.fromDate(dataVolta),
+            finalizado: false,
+            criadoEm: Timestamp.fromDate(new Date()),
+          } as Omit<Jogo, "id">;
+          await adicionarJogo(payloadVolta);
+        }
       }
-      alert("Confrontos salvos!");
-      setConfrontos([{}, {}, {}, {}]);
+      const msg =
+        idaVolta === "ida-volta"
+          ? "Confrontos de ida e volta salvos!"
+          : "Confrontos salvos!";
+      alert(msg);
+      setConfrontos([{}, {}]); // Reset para 2 confrontos
     } catch (e) {
       console.error(e);
       alert("Erro ao salvar confrontos.");
@@ -79,7 +101,7 @@ export function EditorConfrontosGrupo() {
         <CardTitle>Editor manual de confrontos (fase de grupos)</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div>
             <Label>Grupo</Label>
             <Select
@@ -98,16 +120,32 @@ export function EditorConfrontosGrupo() {
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label>Tipo de confronto</Label>
+            <Select
+              value={idaVolta}
+              onValueChange={(v) => setIdaVolta(v as "ida" | "ida-volta")}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ida">Somente ida</SelectItem>
+                <SelectItem value="ida-volta">Ida e volta</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="md:col-span-2 text-sm text-gray-600">
-            Selecione dois times para cada confronto e, opcionalmente, uma
-            data/hora.
+            {idaVolta === "ida-volta"
+              ? "🔄 Ida e volta: Cada confronto gerará 2 jogos. Ex: 2 confrontos = 4 jogos (A×B, B×A, C×D, D×C). Volta agendada 7 dias após."
+              : "➡️ Somente ida: Cada confronto gera 1 jogo. Ex: 2 confrontos = 2 jogos (A×B, C×D)."}
           </div>
         </div>
 
         {confrontos.map((p, idx) => (
           <div
             key={idx}
-            className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end"
+            className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end"
           >
             <div className="md:col-span-2">
               <Label>Time A</Label>
@@ -155,6 +193,18 @@ export function EditorConfrontosGrupo() {
                 onChange={(e) => handleChange(idx, "data", e.target.value)}
                 disabled={!grupo}
               />
+            </div>
+            <div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  setConfrontos((prev) => prev.filter((_, i) => i !== idx));
+                }}
+                disabled={confrontos.length <= 1}
+              >
+                ❌
+              </Button>
             </div>
           </div>
         ))}

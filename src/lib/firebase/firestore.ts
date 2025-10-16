@@ -153,6 +153,26 @@ export const atualizarJogo = async (id: string, dados: Partial<Jogo>) => {
   }
 };
 
+export const removerJogo = async (id: string) => {
+  try {
+    const batch = writeBatch(db);
+
+    // Remove o jogo
+    batch.delete(doc(db, "jogos", id));
+
+    // Remove todos os eventos do jogo
+    const eventosSnap = await getDocs(collection(db, "jogos", id, "eventos"));
+    eventosSnap.docs.forEach((d) => {
+      batch.delete(d.ref);
+    });
+
+    await batch.commit();
+  } catch (error) {
+    console.error("Erro ao remover jogo:", error);
+    throw error;
+  }
+};
+
 // Utilitário: limpar grupos de todos os times (remove o campo 'grupo')
 export const limparGruposDeTodosTimes = async () => {
   try {
@@ -167,6 +187,33 @@ export const limparGruposDeTodosTimes = async () => {
     await batch.commit();
   } catch (error) {
     console.error("Erro ao limpar grupos dos times:", error);
+    throw error;
+  }
+};
+
+// Remover todos os jogos de uma vez
+export const removerTodosJogos = async () => {
+  try {
+    const jogosSnap = await getDocs(collection(db, "jogos"));
+    const batch = writeBatch(db);
+
+    // Para cada jogo, remover o jogo e seus eventos
+    for (const jogoDoc of jogosSnap.docs) {
+      // Remover eventos do jogo
+      const eventosSnap = await getDocs(
+        collection(db, "jogos", jogoDoc.id, "eventos")
+      );
+      eventosSnap.docs.forEach((eventoDoc) => {
+        batch.delete(eventoDoc.ref);
+      });
+
+      // Remover o jogo
+      batch.delete(jogoDoc.ref);
+    }
+
+    await batch.commit();
+  } catch (error) {
+    console.error("Erro ao remover todos os jogos:", error);
     throw error;
   }
 };

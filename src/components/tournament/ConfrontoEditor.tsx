@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Jogo } from "@/types";
 import { useTimes } from "@/hooks/useTimes";
 import { useJogadores } from "@/hooks/useJogadores";
-import { atualizarJogo } from "@/lib/firebase/firestore";
+import { atualizarJogo, removerJogo } from "@/lib/firebase/firestore";
 import {
   adicionarEventoJogo,
   obterEventosJogo,
@@ -90,15 +90,38 @@ export function ConfrontoEditor({ jogo }: Props) {
     await removerEventoJogo(jogo.id, eventoId);
   };
 
+  const removerConfrontoCompleto = async () => {
+    if (
+      confirm(
+        `Tem certeza que deseja remover este confronto?\n${nomeTimeA} × ${nomeTimeB}`
+      )
+    ) {
+      try {
+        await removerJogo(jogo.id);
+        alert("Confronto removido com sucesso!");
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao remover confronto.");
+      }
+    }
+  };
+
   const nomeTimeA = timeA?.nome ?? jogo.timeA;
   const nomeTimeB = timeB?.nome ?? jogo.timeB;
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>
           {nomeTimeA} × {nomeTimeB} {jogo.grupo ? `• Grupo ${jogo.grupo}` : ""}
         </CardTitle>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={removerConfrontoCompleto}
+        >
+          🗑️ Remover confronto
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">

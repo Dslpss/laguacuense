@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { FormularioTime } from "@/components/tournament/FormularioTime";
 import { ListaTimes } from "@/components/tournament/ListaTimes";
 import { TabelaClassificacao } from "@/components/tournament/TabelaClassificacao";
@@ -183,11 +184,14 @@ export default function Home() {
         </Card>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-gray-500 text-sm">
-          <p>
-            Liga Esportiva Lagoacuense • Diretor de Esportes: Christiano Texeira
-            dos Santos
-          </p>
+        <div className="flex justify-center mt-8">
+          <Image
+            src="/SECRETARIAS.zip - 17.png"
+            alt="Liga Esportiva Lagoacuense - Diretor de Esportes: Christiano Texeira dos Santos"
+            width={600}
+            height={100}
+            className="object-contain"
+          />
         </div>
       </div>
     </div>
