@@ -33,16 +33,16 @@ export function TabelaClassificacao() {
 
   if (carregando) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Classificação</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-center text-muted-foreground">
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-yellow-600/20 to-yellow-700/20 border-b border-white/20 p-6">
+          <h2 className="text-2xl font-bold text-yellow-100">Classificação</h2>
+        </div>
+        <div className="p-6">
+          <p className="text-center text-green-200">
             Carregando classificação...
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -50,14 +50,19 @@ export function TabelaClassificacao() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Classificação Geral</CardTitle>
-          <CardDescription>
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-yellow-600/20 to-yellow-700/20 border-b border-white/20 p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 px-4 py-2 rounded-xl shadow-lg">
+              <span className="text-white font-bold text-lg">🏆</span>
+            </div>
+            <h2 className="text-2xl font-bold text-yellow-100">Classificação Geral</h2>
+          </div>
+          <p className="text-yellow-200 font-medium">
             Classificação seguindo os critérios do Art. 46º do regulamento
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+        <div className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {["A", "B", "C", "D"].map((grupo) => {
               const timesDoGrupo = grupos[grupo] || [];
@@ -65,54 +70,53 @@ export function TabelaClassificacao() {
               return (
                 <div key={grupo} className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Grupo {grupo}</Badge>
+                    <div className="bg-gradient-to-br from-green-500 to-green-600 px-4 py-2 rounded-xl shadow-lg">
+                      <span className="text-white font-bold">Grupo {grupo}</span>
+                    </div>
                   </div>
 
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto bg-slate-900/50 rounded-xl border border-white/10">
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-8 sticky left-0 bg-background">
+                        <TableRow className="border-white/10 hover:bg-white/5">
+                          <TableHead className="w-8 sticky left-0 bg-slate-900/80 text-green-200 font-semibold">
                             #
                           </TableHead>
-                          <TableHead className="sticky left-8 bg-background min-w-[120px]">
+                          <TableHead className="sticky left-8 bg-slate-900/80 min-w-[120px] text-green-200 font-semibold">
                             Time
                           </TableHead>
-                          <TableHead className="text-center">P</TableHead>
-                          <TableHead className="text-center hidden sm:table-cell">
+                          <TableHead className="text-center text-green-200 font-semibold">P</TableHead>
+                          <TableHead className="text-center hidden sm:table-cell text-green-200 font-semibold">
                             J
                           </TableHead>
-                          <TableHead className="text-center">V</TableHead>
-                          <TableHead className="text-center hidden sm:table-cell">
+                          <TableHead className="text-center text-green-200 font-semibold">V</TableHead>
+                          <TableHead className="text-center hidden sm:table-cell text-green-200 font-semibold">
                             E
                           </TableHead>
-                          <TableHead className="text-center hidden sm:table-cell">
+                          <TableHead className="text-center hidden sm:table-cell text-green-200 font-semibold">
                             D
                           </TableHead>
-                          <TableHead className="text-center hidden md:table-cell">
+                          <TableHead className="text-center hidden md:table-cell text-green-200 font-semibold">
                             GM
                           </TableHead>
-                          <TableHead className="text-center hidden md:table-cell">
+                          <TableHead className="text-center hidden md:table-cell text-green-200 font-semibold">
                             GS
                           </TableHead>
-                          <TableHead className="text-center">SG</TableHead>
+                          <TableHead className="text-center text-green-200 font-semibold">SG</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {timesDoGrupo.map((time, index) => (
-                          <TableRow key={time.timeId}>
-                            <TableCell className="font-medium sticky left-0 bg-background">
+                          <TableRow key={time.timeId} className="border-white/10 hover:bg-white/5">
+                            <TableCell className="font-medium sticky left-0 bg-slate-900/80 text-yellow-100">
                               {index + 1}
                               {index < 2 && (
-                                <Badge
-                                  variant="outline"
-                                  className="ml-1 text-xs"
-                                >
-                                  Q
-                                </Badge>
+                                <div className="inline-block bg-gradient-to-br from-blue-500 to-blue-600 px-2 py-1 rounded-md shadow-sm ml-1">
+                                  <span className="text-white text-xs font-bold">Q</span>
+                                </div>
                               )}
                             </TableCell>
-                            <TableCell className="font-medium sticky left-8 bg-background">
+                            <TableCell className="font-medium sticky left-8 bg-slate-900/80">
                               <div className="flex items-center gap-2">
                                 {timesMap[time.timeId]?.logoUrl ? (
                                   <Image
@@ -125,40 +129,40 @@ export function TabelaClassificacao() {
                                     unoptimized
                                   />
                                 ) : (
-                                  <div className="h-6 w-6 flex items-center justify-center bg-muted rounded text-xs text-muted-foreground">
+                                  <div className="h-6 w-6 flex items-center justify-center bg-slate-700/50 rounded text-xs text-green-300">
                                     ?
                                   </div>
                                 )}
-                                <span>{time.nomeTime}</span>
+                                <span className="text-yellow-100 font-medium">{time.nomeTime}</span>
                               </div>
                             </TableCell>
-                            <TableCell className="text-center font-bold">
+                            <TableCell className="text-center font-bold text-yellow-100">
                               {time.pontos}
                             </TableCell>
-                            <TableCell className="text-center hidden sm:table-cell">
+                            <TableCell className="text-center hidden sm:table-cell text-green-200">
                               {time.jogos}
                             </TableCell>
-                            <TableCell className="text-center">
+                            <TableCell className="text-center text-green-200">
                               {time.vitorias}
                             </TableCell>
-                            <TableCell className="text-center hidden sm:table-cell">
+                            <TableCell className="text-center hidden sm:table-cell text-green-200">
                               {time.empates}
                             </TableCell>
-                            <TableCell className="text-center hidden sm:table-cell">
+                            <TableCell className="text-center hidden sm:table-cell text-green-200">
                               {time.derrotas}
                             </TableCell>
-                            <TableCell className="text-center hidden md:table-cell">
+                            <TableCell className="text-center hidden md:table-cell text-green-200">
                               {time.golsMarcados}
                             </TableCell>
-                            <TableCell className="text-center hidden md:table-cell">
+                            <TableCell className="text-center hidden md:table-cell text-green-200">
                               {time.golsSofridos}
                             </TableCell>
                             <TableCell className="text-center">
                               <span
                                 className={
                                   time.saldoGols >= 0
-                                    ? "text-green-600 font-semibold"
-                                    : "text-red-600 font-semibold"
+                                    ? "text-green-400 font-semibold"
+                                    : "text-red-400 font-semibold"
                                 }
                               >
                                 {time.saldoGols > 0 ? "+" : ""}
@@ -175,26 +179,121 @@ export function TabelaClassificacao() {
             })}
           </div>
 
-          <div className="mt-4 text-xs sm:text-sm text-muted-foreground space-y-2">
-            <p>
-              <strong>Legenda:</strong> P = Pontos, J = Jogos, V = Vitórias, E =
-              Empates, D = Derrotas, GM = Gols Marcados, GS = Gols Sofridos, SG
-              = Saldo de Gols, Q = Qualificado
-            </p>
-            <p className="text-xs">
-              <em>
-                Nota: Em telas pequenas, algumas colunas ficam ocultas. Role
-                horizontalmente para ver todas.
-              </em>
-            </p>
-            <p className="mt-2">
-              <strong>Critérios de desempate:</strong> 1º Pontos, 2º Vitórias,
-              3º Saldo de gols, 4º Gols marcados, 5º Gols sofridos, 6º Derrotas,
-              7º Cartões vermelhos, 8º Cartões amarelos, 9º Sorteio
-            </p>
+          <div className="mt-6 space-y-4">
+            {/* Legenda das Colunas */}
+            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 px-3 py-1 rounded-lg shadow-sm">
+                  <span className="text-white text-sm font-bold">📊</span>
+                </div>
+                <h3 className="text-yellow-200 font-bold text-sm">Legenda das Colunas</h3>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-bold">P</span>
+                  <span className="text-green-200">Pontos</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-green-500/20 text-green-300 px-2 py-1 rounded font-bold">J</span>
+                  <span className="text-green-200">Jogos</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-green-500/20 text-green-300 px-2 py-1 rounded font-bold">V</span>
+                  <span className="text-green-200">Vitórias</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-green-500/20 text-green-300 px-2 py-1 rounded font-bold">E</span>
+                  <span className="text-green-200">Empates</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-green-500/20 text-green-300 px-2 py-1 rounded font-bold">D</span>
+                  <span className="text-green-200">Derrotas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-green-500/20 text-green-300 px-2 py-1 rounded font-bold">GM</span>
+                  <span className="text-green-200">Gols Marcados</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-green-500/20 text-green-300 px-2 py-1 rounded font-bold">GS</span>
+                  <span className="text-green-200">Gols Sofridos</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-green-500/20 text-green-300 px-2 py-1 rounded font-bold">SG</span>
+                  <span className="text-green-200">Saldo de Gols</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded font-bold">Q</span>
+                  <span className="text-green-200">Qualificado</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Nota sobre Responsividade */}
+            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-gradient-to-br from-orange-500 to-orange-600 px-3 py-1 rounded-lg shadow-sm">
+                  <span className="text-white text-sm font-bold">📱</span>
+                </div>
+                <h3 className="text-yellow-200 font-bold text-sm">Visualização Responsiva</h3>
+              </div>
+              <p className="text-green-300 text-xs leading-relaxed">
+                <em>
+                  Em dispositivos móveis e telas pequenas, algumas colunas ficam ocultas para melhor visualização. 
+                  Role horizontalmente na tabela para ver todas as estatísticas disponíveis.
+                </em>
+              </p>
+            </div>
+
+            {/* Critérios de Desempate */}
+            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 px-3 py-1 rounded-lg shadow-sm">
+                  <span className="text-white text-sm font-bold">⚖️</span>
+                </div>
+                <h3 className="text-yellow-200 font-bold text-sm">Critérios de Desempate</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-bold min-w-[24px] text-center">1º</span>
+                  <span className="text-green-200">Pontos</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-bold min-w-[24px] text-center">2º</span>
+                  <span className="text-green-200">Vitórias</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-bold min-w-[24px] text-center">3º</span>
+                  <span className="text-green-200">Saldo de Gols</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-bold min-w-[24px] text-center">4º</span>
+                  <span className="text-green-200">Gols Marcados</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-bold min-w-[24px] text-center">5º</span>
+                  <span className="text-green-200">Gols Sofridos</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-bold min-w-[24px] text-center">6º</span>
+                  <span className="text-green-200">Derrotas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-red-500/20 text-red-300 px-2 py-1 rounded font-bold min-w-[24px] text-center">7º</span>
+                  <span className="text-green-200">Cartões Vermelhos</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-yellow-600/20 text-yellow-300 px-2 py-1 rounded font-bold min-w-[24px] text-center">8º</span>
+                  <span className="text-green-200">Cartões Amarelos</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-gray-500/20 text-gray-300 px-2 py-1 rounded font-bold min-w-[24px] text-center">9º</span>
+                  <span className="text-green-200">Sorteio</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
