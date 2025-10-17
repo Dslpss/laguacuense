@@ -60,14 +60,14 @@ export default function Home() {
   };
 
   const conteudoPrincipal = (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
       <div className="container mx-auto py-8 px-4">
         {/* Header */}
         <div className="text-center mb-8 px-4">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-800 mb-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
             ⚽ Campeonato Lagoacuense de Futebol 2025
           </h1>
-          <p className="text-base sm:text-lg text-gray-600 mb-6">
+          <p className="text-base sm:text-lg text-green-200 mb-6">
             Sistema de gestão do torneio - Liga Esportiva Lagoacuense
           </p>
 
@@ -360,15 +360,36 @@ export default function Home() {
           </DialogContent>
         </Dialog>
 
-        {/* Footer */}
-        <div className="flex justify-center mt-8 px-4">
-          <Image
-            src="/SECRETARIAS.zip - 17.png"
-            alt="Liga Esportiva Lagoacuense - Diretor de Esportes: Christiano Texeira dos Santos"
-            width={450}
-            height={75}
-            className="object-contain max-w-full h-auto"
-          />
+        {/* Footer Premium */}
+        <div className="mt-16 pt-12 border-t border-white/20">
+          <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/10">
+            <div className="flex justify-center mb-6">
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+                <Image
+                  src="/SECRETARIAS.zip - 17.png"
+                  alt="Liga Esportiva Lagoacuense - Diretor de Esportes: Christiano Texeira dos Santos"
+                  width={450}
+                  height={75}
+                  className="object-contain max-w-full h-auto"
+                />
+              </div>
+            </div>
+            <div className="text-center space-y-3">
+              <p className="text-white font-bold text-lg">
+                Liga Esportiva Lagoacuense
+              </p>
+              <p className="text-green-200 font-medium">
+                Diretor de Esportes:{" "}
+                <span className="text-white">
+                  Christiano Texeira dos Santos
+                </span>
+              </p>
+              <p className="text-green-300/80 text-sm max-w-md mx-auto">
+                Sistema desenvolvido para gestão e acompanhamento do Campeonato
+                Lagoacuense 2025
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

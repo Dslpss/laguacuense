@@ -178,7 +178,7 @@ export function ConfrontoEditor({ jogo }: Props) {
               disabled={salvo}
             />
           </div>
-          <div className="md:col-span-2 text-sm text-gray-600">
+          <div className="md:col-span-2 text-sm text-green-700">
             Atualize o placar e salve. Os eventos abaixo não alteram
             automaticamente o placar (flexível para W.O., correções etc.).
           </div>

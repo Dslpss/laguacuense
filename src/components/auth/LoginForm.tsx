@@ -176,9 +176,9 @@ export function LoginForm({ onLoginSucesso }: LoginFormProps) {
             </form>
 
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center justify-center gap-2 text-sm text-green-700">
                 <svg
-                  className="h-4 w-4 text-gray-400"
+                  className="h-4 w-4 text-green-600"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >

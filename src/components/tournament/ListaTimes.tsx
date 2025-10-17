@@ -30,11 +30,16 @@ import {
 } from "@/components/ui/select";
 import { removerTime } from "@/lib/firebase/firestore";
 import { adicionarJogador } from "@/lib/firebase/firestore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { uploadLogo } from "@/lib/firebase/storage";
 import { atualizarTime } from "@/lib/firebase/firestore";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function ListaTimes() {
+  // Estados para paginação
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [itensPorPagina] = useState(6); // 6 times por página (2 linhas de 3 colunas)
+
   // Hooks para edição/adição de logo do time
   const [logoDialogOpen, setLogoDialogOpen] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -73,6 +78,20 @@ export function ListaTimes() {
     }
   };
   const { times, carregando, erro } = useTimes();
+  
+  // Cálculos para paginação
+  const totalPaginas = Math.ceil(times.length / itensPorPagina);
+  const indiceInicio = (paginaAtual - 1) * itensPorPagina;
+  const indiceFim = indiceInicio + itensPorPagina;
+  const timesExibidos = times.slice(indiceInicio, indiceFim);
+
+  // Ajustar página atual se necessário quando times são removidos
+  useEffect(() => {
+    if (paginaAtual > totalPaginas && totalPaginas > 0) {
+      setPaginaAtual(totalPaginas);
+    }
+  }, [times.length, totalPaginas, paginaAtual]);
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [timeSelecionado, setTimeSelecionado] = useState<{
     id: string;
@@ -207,63 +226,109 @@ export function ListaTimes() {
             Nenhum time cadastrado ainda
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {times.map((time) => (
-              <Card key={time.id} className="p-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    {time.logoUrl ? (
-                      <Image
-                        src={time.logoUrl}
-                        alt={"Logo de " + time.nome}
-                        width={48}
-                        height={48}
-                        className="object-contain rounded border bg-white"
-                        style={{ maxWidth: "48px", maxHeight: "48px" }}
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="h-12 w-12 flex items-center justify-center bg-muted rounded border text-xs text-muted-foreground">
-                        Sem logo
-                      </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {timesExibidos.map((time) => (
+                <Card key={time.id} className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      {time.logoUrl ? (
+                        <Image
+                          src={time.logoUrl}
+                          alt={"Logo de " + time.nome}
+                          width={48}
+                          height={48}
+                          className="object-contain rounded border bg-white"
+                          style={{ maxWidth: "48px", maxHeight: "48px" }}
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="h-12 w-12 flex items-center justify-center bg-muted rounded border text-xs text-muted-foreground">
+                          Sem logo
+                        </div>
+                      )}
+                      <h3 className="font-semibold">{time.nome}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{time.cidade}</p>
+                    {time.grupo && (
+                      <Badge variant="outline">Grupo {time.grupo}</Badge>
                     )}
-                    <h3 className="font-semibold">{time.nome}</h3>
+                    <div className="pt-2 flex flex-wrap gap-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() =>
+                          pedirConfirmacaoExclusao(time.id!, time.nome)
+                        }
+                      >
+                        Remover
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => abrirCadastroJogador(time.id!, time.nome)}
+                      >
+                        Adicionar jogador
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          abrirLogoDialog(time.id!, time.nome, time.logoUrl)
+                        }
+                      >
+                        {time.logoUrl ? "Editar logo" : "Adicionar logo"}
+                      </Button>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">{time.cidade}</p>
-                  {time.grupo && (
-                    <Badge variant="outline">Grupo {time.grupo}</Badge>
-                  )}
-                  <div className="pt-2 flex flex-wrap gap-2">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() =>
-                        pedirConfirmacaoExclusao(time.id!, time.nome)
-                      }
-                    >
-                      Remover
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => abrirCadastroJogador(time.id!, time.nome)}
-                    >
-                      Adicionar jogador
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        abrirLogoDialog(time.id!, time.nome, time.logoUrl)
-                      }
-                    >
-                      {time.logoUrl ? "Editar logo" : "Adicionar logo"}
-                    </Button>
-                  </div>
+                </Card>
+              ))}
+            </div>
+            
+            {/* Controles de paginação */}
+            {totalPaginas > 1 && (
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-green-200/50">
+                <div className="text-sm text-muted-foreground">
+                  Mostrando {indiceInicio + 1} a {Math.min(indiceFim, times.length)} de {times.length} times
                 </div>
-              </Card>
-            ))}
-          </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPaginaAtual(paginaAtual - 1)}
+                    disabled={paginaAtual === 1}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((pagina) => (
+                      <Button
+                        key={pagina}
+                        variant={pagina === paginaAtual ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPaginaAtual(pagina)}
+                        className="h-8 w-8 p-0"
+                      >
+                        {pagina}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPaginaAtual(paginaAtual + 1)}
+                    disabled={paginaAtual === totalPaginas}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </CardContent>
 

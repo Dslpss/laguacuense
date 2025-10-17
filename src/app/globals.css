@@ -47,21 +47,21 @@
   --radius: 0.625rem;
   --background: oklch(1 0 0); /* branco */
   --foreground: oklch(0.15 0.15 260); /* azul escuro para texto */
-  --card: oklch(1 0 0); /* branco */
+  --card: oklch(0.95 0.02 140 / 0.9); /* card semi-transparente com tom verde */
   --card-foreground: oklch(0.15 0.15 260); /* azul escuro */
-  --popover: oklch(1 0 0); /* branco */
+  --popover: oklch(0.95 0.02 140 / 0.95); /* popover semi-transparente */
   --popover-foreground: oklch(0.15 0.15 260); /* azul escuro */
   --primary: oklch(0.6 0.15 260); /* azul institucional */
   --primary-foreground: oklch(1 0 0); /* branco */
   --secondary: oklch(0.7 0.18 140); /* verde institucional */
   --secondary-foreground: oklch(1 0 0); /* branco */
-  --muted: oklch(0.95 0.01 260); /* cinza claro */
-  --muted-foreground: oklch(0.15 0.15 260); /* azul escuro */
+  --muted: oklch(0.9 0.05 140 / 0.8); /* muted com tom verde */
+  --muted-foreground: oklch(0.4 0.1 140); /* texto muted verde escuro */
   --accent: oklch(0.95 0.18 100); /* amarelo institucional */
   --accent-foreground: oklch(0.15 0.15 260); /* azul escuro */
   --destructive: oklch(0.577 0.245 27.325); /* vermelho padrão */
-  --border: oklch(0.95 0.01 260); /* cinza claro */
-  --input: oklch(0.95 0.01 260); /* cinza claro */
+  --border: oklch(0.8 0.05 140 / 0.3); /* border com tom verde */
+  --input: oklch(0.98 0.01 140 / 0.8); /* input com tom verde claro */
   --ring: oklch(0.6 0.15 260); /* azul institucional */
   --chart-1: oklch(0.6 0.15 260); /* azul */
   --chart-2: oklch(0.7 0.18 140); /* verde */

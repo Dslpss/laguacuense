@@ -58,6 +58,7 @@ export interface Sorteio {
   final?: {
     jogo1: { time1: string; time2: string };
   };
+  manual?: boolean; // Indica se o sorteio foi feito manualmente
   criadoEm: Timestamp;
 }
 

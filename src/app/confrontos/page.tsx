@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { Time } from "@/types";
 import { HeaderAdmin } from "@/components/auth/HeaderAdmin";
 import { useJogos } from "@/hooks/useJogos";
 import { useTimes } from "@/hooks/useTimes";
 import { ConfrontoEditor } from "@/components/tournament/ConfrontoEditor";
+import { DefinirSemifinaisManual } from "@/components/admin/DefinirSemifinaisManual";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 import { removerTodosJogos } from "@/lib/firebase/firestore";
 import { 
   verificarFaseGruposCompleta,
@@ -19,7 +22,8 @@ import {
   verificarSemifinaisCompletas,
   verificarFinalCompleta,
   verificarFaseExiste,
-  obterCampeao
+  obterCampeao,
+  obterVencedoresQuartas
 } from "@/lib/eliminatorias";
 
 export default function ConfrontosPage() {
@@ -27,6 +31,7 @@ export default function ConfrontosPage() {
   const { times } = useTimes();
   const [removendo, setRemovendo] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
+  const [mostrarDefinicaoManual, setMostrarDefinicaoManual] = useState(false);
 
   // Verifica se a fase de grupos pode ser finalizada
   const podeFinalizarGrupos = verificarFaseGruposCompleta(jogos) && 
@@ -44,6 +49,10 @@ export default function ConfrontosPage() {
   
   // Verifica se há campeão
   const campeao = finalCompleta ? obterCampeao(jogos) : null;
+  
+  // Obtém vencedores das quartas para definição manual das semifinais
+  const vencedoresQuartasIds = quartasCompletas ? obterVencedoresQuartas(jogos) : [];
+  const vencedoresQuartas = vencedoresQuartasIds.map(id => times.find(t => t.id === id)).filter(Boolean) as Time[];
 
   const finalizarFaseGrupos = async () => {
     if (!podeFinalizarGrupos) {
@@ -199,7 +208,7 @@ export default function ConfrontosPage() {
   };
 
   const conteudo = (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
       <div className="container mx-auto py-8 px-4 space-y-6">
         <div className="flex items-center justify-between mb-6">
           <Link href="/">
@@ -244,6 +253,16 @@ export default function ConfrontosPage() {
                 ) : (
                   <>⚽ Finalizar Quartas</>
                 )}
+              </Button>
+            )}
+
+            {/* Botão para definir semifinais manualmente */}
+            {quartasCompletas && !jaTemSemifinais && vencedoresQuartas.length === 4 && (
+              <Button
+                onClick={() => setMostrarDefinicaoManual(true)}
+                className="gap-2 bg-orange-600 hover:bg-orange-700"
+              >
+                ⚙️ Definir Semifinais Manualmente
               </Button>
             )}
 
@@ -326,20 +345,52 @@ export default function ConfrontosPage() {
         </div>
 
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-green-800 mb-2">Confrontos</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-white mb-2">Confrontos</h1>
+          <p className="text-green-200">
             Registre placares e eventos por jogador.
           </p>
         </div>
 
         <div className="space-y-4">
           {jogos.length === 0 ? (
-            <p className="text-center text-gray-600">
+            <p className="text-center text-gray-300">
               Nenhum jogo cadastrado ainda.
             </p>
           ) : (
             jogos.map((j) => <ConfrontoEditor key={j.id} jogo={j} />)
           )}
+        </div>
+
+        {/* Footer Premium */}
+        <div className="mt-16 pt-12 border-t border-white/20">
+          <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/10">
+            <div className="flex justify-center mb-6">
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+                <Image
+                  src="/SECRETARIAS.zip - 17.png"
+                  alt="Liga Esportiva Lagoacuense - Diretor de Esportes: Christiano Texeira dos Santos"
+                  width={450}
+                  height={75}
+                  className="object-contain max-w-full h-auto"
+                />
+              </div>
+            </div>
+            <div className="text-center space-y-3">
+              <p className="text-white font-bold text-lg">
+                Liga Esportiva Lagoacuense
+              </p>
+              <p className="text-green-200 font-medium">
+                Diretor de Esportes:{" "}
+                <span className="text-white">
+                  Christiano Texeira dos Santos
+                </span>
+              </p>
+              <p className="text-green-300/80 text-sm max-w-md mx-auto">
+                Sistema desenvolvido para gestão e acompanhamento do Campeonato
+                Lagoacuense 2025
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -349,6 +400,19 @@ export default function ConfrontosPage() {
     <ProtectedRoute>
       <HeaderAdmin />
       {conteudo}
+      
+      {/* Modal para definir semifinais manualmente */}
+      {mostrarDefinicaoManual && (
+        <DefinirSemifinaisManual
+          vencedoresQuartas={vencedoresQuartas.map(time => time.id)}
+          onClose={() => setMostrarDefinicaoManual(false)}
+          onSuccess={() => {
+            setMostrarDefinicaoManual(false);
+            // Recarregar a página para atualizar os dados
+            window.location.reload();
+          }}
+        />
+      )}
     </ProtectedRoute>
   );
 }

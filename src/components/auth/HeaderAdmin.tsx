@@ -19,17 +19,17 @@ export function HeaderAdmin() {
   if (!usuario) return null;
 
   return (
-    <header className="bg-primary border-b-4 border-accent shadow-md">
+    <header className="bg-slate-800/90 backdrop-blur-sm border-b-4 border-green-600/50 shadow-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-16 py-3 sm:py-0 gap-2 sm:gap-0">
           <div className="flex items-center">
-            <h1 className="text-lg sm:text-xl font-semibold text-primary-foreground drop-shadow text-center sm:text-left">
+            <h1 className="text-lg sm:text-xl font-semibold text-white drop-shadow-lg text-center sm:text-left">
               Painel Administrativo
             </h1>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-center">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-primary-foreground">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-green-200">
               <User className="h-4 w-4 shrink-0" />
               <span className="truncate max-w-[150px] sm:max-w-none">
                 {usuario.email}
@@ -40,7 +40,7 @@ export function HeaderAdmin() {
               variant="outline"
               size="sm"
               onClick={handleLogout}
-              className="flex items-center gap-2 border-accent bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground"
+              className="flex items-center gap-2 border-green-600/50 bg-slate-700/80 text-white hover:bg-green-600 hover:text-white transition-all duration-200"
             >
               <LogOut className="h-4 w-4" />
               <span>Sair</span>

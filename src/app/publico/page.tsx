@@ -301,7 +301,7 @@ export default function PaginaPublica() {
         </div>
 
         {/* Conteúdo das abas */}
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-6 bg-slate-800/20 backdrop-blur-sm rounded-2xl border border-slate-700/30 shadow-lg p-4 sm:p-6">
           {abaSelecionada === "times" && (
             <div className="max-w-7xl mx-auto px-2 sm:px-4">
               <ListaTimesPublica />
