@@ -77,7 +77,7 @@ export function ConfrontoEditor({ jogo }: Props) {
         finalizado: true,
       });
       setSalvo(true);
-    } catch (err: unknown) {
+    } catch {
       setErroSalvar("Erro ao salvar placar");
     } finally {
       setSalvando(false);
@@ -201,7 +201,7 @@ export function ConfrontoEditor({ jogo }: Props) {
                   try {
                     await atualizarJogo(jogo.id, { finalizado: false });
                     setSalvo(false);
-                  } catch (err) {
+                  } catch {
                     setErroSalvar("Erro ao reabrir jogo para edição");
                   }
                 }}

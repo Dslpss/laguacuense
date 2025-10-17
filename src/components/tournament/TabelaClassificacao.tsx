@@ -4,13 +4,6 @@ import { useClassificacao } from "@/hooks/useClassificacao";
 import { useTimes } from "@/hooks/useTimes";
 import { agruparClassificacaoPorGrupo } from "@/lib/classificacao";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Table,
   TableBody,
   TableCell,
@@ -18,8 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import { Time } from "@/types";
 
 export function TabelaClassificacao() {
   const { classificacao, carregando } = useClassificacao();
@@ -29,7 +22,7 @@ export function TabelaClassificacao() {
   const timesMap = times.reduce((acc, time) => {
     acc[time.id] = time;
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, Time>);
 
   if (carregando) {
     return (
@@ -118,9 +111,11 @@ export function TabelaClassificacao() {
                             </TableCell>
                             <TableCell className="font-medium sticky left-8 bg-slate-900/80">
                               <div className="flex items-center gap-2">
-                                {timesMap[time.timeId]?.logoUrl ? (
-                                  <Image
-                                    src={timesMap[time.timeId].logoUrl}
+                                {(() => {
+                                  const timeData = timesMap[time.timeId];
+                                  return timeData?.logoUrl ? (
+                                    <Image
+                                      src={timeData.logoUrl}
                                     alt={`Logo de ${time.nomeTime}`}
                                     width={24}
                                     height={24}
@@ -128,11 +123,12 @@ export function TabelaClassificacao() {
                                     style={{ maxWidth: "24px", maxHeight: "24px" }}
                                     unoptimized
                                   />
-                                ) : (
-                                  <div className="h-6 w-6 flex items-center justify-center bg-slate-700/50 rounded text-xs text-green-300">
-                                    ?
-                                  </div>
-                                )}
+                                  ) : (
+                                    <div className="h-6 w-6 flex items-center justify-center bg-slate-700/50 rounded text-xs text-green-300">
+                                      ?
+                                    </div>
+                                  );
+                                })()}
                                 <span className="text-yellow-100 font-medium">{time.nomeTime}</span>
                               </div>
                             </TableCell>
