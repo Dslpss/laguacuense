@@ -29,7 +29,7 @@ export interface Jogo {
   cartoesVermelhoTimeA?: number;
   cartoesAmarelosTimeB?: number;
   cartoesVermelhoTimeB?: number;
-  fase: "grupos" | "semifinal" | "final";
+  fase: "grupos" | "quartas" | "semifinal" | "final";
   grupo?: "A" | "B" | "C" | "D";
   dataJogo: Timestamp;
   finalizado: boolean;
@@ -38,16 +38,25 @@ export interface Jogo {
 
 export interface Sorteio {
   id: string;
-  tipo: "grupos" | "semifinais";
+  tipo: "grupos" | "quartas" | "semifinais" | "final";
   grupos?: {
     A: string[]; // IDs dos times
     B: string[];
     C: string[];
     D: string[];
   };
+  quartas?: {
+    jogo1: { time1: string; time2: string };
+    jogo2: { time1: string; time2: string };
+    jogo3: { time1: string; time2: string };
+    jogo4: { time1: string; time2: string };
+  };
   semifinais?: {
     jogo1: { time1: string; time2: string };
     jogo2: { time1: string; time2: string };
+  };
+  final?: {
+    jogo1: { time1: string; time2: string };
   };
   criadoEm: Timestamp;
 }
@@ -70,4 +79,4 @@ export interface ClassificacaoTime {
 
 // Enums úteis
 export const GRUPOS = ["A", "B", "C", "D"] as const;
-export const FASES = ["grupos", "semifinal", "final"] as const;
+export const FASES = ["grupos", "quartas", "semifinal", "final"] as const;

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ListaTimesPublica } from "@/components/tournament/ListaTimesPublica";
 import { TabelaClassificacao } from "@/components/tournament/TabelaClassificacao";
+import { ChaveamentoPublico } from "@/components/tournament/ChaveamentoPublico";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -272,6 +273,30 @@ export default function PaginaPublica() {
               </svg>
               <span className="text-sm sm:text-base">Confrontos</span>
             </Button>
+            <Button
+              variant={abaSelecionada === "chaveamento" ? "default" : "ghost"}
+              onClick={() => setAbaSelecionada("chaveamento")}
+              className={
+                abaSelecionada === "chaveamento"
+                  ? "h-10 sm:h-12 px-3 sm:px-6 bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:shadow-xl"
+                  : "h-10 sm:h-12 px-3 sm:px-6 text-white hover:bg-white/10"
+              }
+            >
+              <svg
+                className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+              <span className="text-sm sm:text-base">Chaveamento</span>
+            </Button>
           </div>
         </div>
 
@@ -419,6 +444,12 @@ export default function PaginaPublica() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {abaSelecionada === "chaveamento" && (
+            <div className="max-w-7xl mx-auto px-2 sm:px-4">
+              <ChaveamentoPublico />
             </div>
           )}
         </div>
