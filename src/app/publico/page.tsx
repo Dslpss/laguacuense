@@ -110,21 +110,21 @@ export default function PaginaPublica() {
           </div>
 
           {/* Título com gradiente premium */}
-          <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-4 sm:mb-6 leading-tight flex flex-col items-center justify-center">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-black mb-4 sm:mb-6 leading-tight flex flex-col items-center justify-center">
             <span className="flex items-center justify-center gap-1 sm:gap-2 drop-shadow-2xl whitespace-nowrap sm:whitespace-normal">
-              <span className="flex-shrink-0 text-3xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-black">
+              <span className="flex-shrink-0 text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-7xl text-black">
                 ⚽
               </span>
               <span className="bg-gradient-to-r from-white via-green-200 to-white bg-clip-text text-transparent">
                 Campeonato Lagoacuense
               </span>
             </span>
-            <span className="text-sm sm:text-xl md:text-3xl lg:text-4xl xl:text-5xl bg-gradient-to-r from-green-300 via-green-100 to-green-300 bg-clip-text text-transparent">
+            <span className="text-sm sm:text-xl md:text-2xl lg:text-3xl xl:text-3xl bg-gradient-to-r from-green-300 via-green-100 to-green-300 bg-clip-text text-transparent">
               de Futebol 2025
             </span>
           </h1>
 
-          <p className="text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-green-100 font-light mb-6 sm:mb-10 max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl md:text-xl lg:text-2xl xl:text-2xl text-green-100 font-light mb-6 sm:mb-10 max-w-2xl mx-auto">
             Acompanhe os times, grupos e classificações do maior torneio da
             região
           </p>
