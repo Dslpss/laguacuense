@@ -1,6 +1,7 @@
 "use client";
 
 import { useClassificacao } from "@/hooks/useClassificacao";
+import { useTimes } from "@/hooks/useTimes";
 import { agruparClassificacaoPorGrupo } from "@/lib/classificacao";
 import {
   Card,
@@ -18,9 +19,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 export function TabelaClassificacao() {
   const { classificacao, carregando } = useClassificacao();
+  const { times } = useTimes();
+
+  // Criar um mapa de times para acesso rápido às logos
+  const timesMap = times.reduce((acc, time) => {
+    acc[time.id] = time;
+    return acc;
+  }, {} as Record<string, any>);
 
   if (carregando) {
     return (
@@ -104,7 +113,24 @@ export function TabelaClassificacao() {
                               )}
                             </TableCell>
                             <TableCell className="font-medium sticky left-8 bg-background">
-                              {time.nomeTime}
+                              <div className="flex items-center gap-2">
+                                {timesMap[time.timeId]?.logoUrl ? (
+                                  <Image
+                                    src={timesMap[time.timeId].logoUrl}
+                                    alt={`Logo de ${time.nomeTime}`}
+                                    width={24}
+                                    height={24}
+                                    className="object-contain rounded"
+                                    style={{ maxWidth: "24px", maxHeight: "24px" }}
+                                    unoptimized
+                                  />
+                                ) : (
+                                  <div className="h-6 w-6 flex items-center justify-center bg-muted rounded text-xs text-muted-foreground">
+                                    ?
+                                  </div>
+                                )}
+                                <span>{time.nomeTime}</span>
+                              </div>
                             </TableCell>
                             <TableCell className="text-center font-bold">
                               {time.pontos}

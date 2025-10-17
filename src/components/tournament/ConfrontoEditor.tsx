@@ -74,6 +74,7 @@ export function ConfrontoEditor({ jogo }: Props) {
       await atualizarJogo(jogo.id, {
         golsTimeA: Number(golsA),
         golsTimeB: Number(golsB),
+        finalizado: true,
       });
       setSalvo(true);
     } catch (err: unknown) {
@@ -125,9 +126,28 @@ export function ConfrontoEditor({ jogo }: Props) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>
-          {nomeTimeA} × {nomeTimeB} {jogo.grupo ? `• Grupo ${jogo.grupo}` : ""}
-        </CardTitle>
+        <div className="flex flex-col gap-1">
+          <CardTitle className="flex items-center gap-2">
+            {nomeTimeA} × {nomeTimeB} {jogo.grupo ? `• Grupo ${jogo.grupo}` : ""}
+            {jogo.finalizado && (
+              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                Finalizado
+              </span>
+            )}
+          </CardTitle>
+          <div className="text-sm text-gray-600 flex items-center gap-1">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            {jogo.dataJogo?.toDate?.()?.toLocaleString?.("pt-BR", {
+              day: "2-digit",
+              month: "2-digit", 
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit"
+            }) || "Data não definida"}
+          </div>
+        </div>
         <Button
           variant="destructive"
           size="sm"
@@ -162,7 +182,7 @@ export function ConfrontoEditor({ jogo }: Props) {
             Atualize o placar e salve. Os eventos abaixo não alteram
             automaticamente o placar (flexível para W.O., correções etc.).
           </div>
-          <div>
+          <div className="space-y-2">
             <Button
               className="w-full bg-green-600 hover:bg-green-700"
               onClick={salvarPlacar}
@@ -174,6 +194,22 @@ export function ConfrontoEditor({ jogo }: Props) {
                 ? "Placar salvo"
                 : "Salvar placar"}
             </Button>
+            {jogo.finalizado && (
+              <Button
+                className="w-full bg-yellow-600 hover:bg-yellow-700"
+                onClick={async () => {
+                  try {
+                    await atualizarJogo(jogo.id, { finalizado: false });
+                    setSalvo(false);
+                  } catch (err) {
+                    setErroSalvar("Erro ao reabrir jogo para edição");
+                  }
+                }}
+                variant="outline"
+              >
+                Reabrir para edição
+              </Button>
+            )}
             {erroSalvar && (
               <div className="text-red-600 mt-2 text-sm">{erroSalvar}</div>
             )}
