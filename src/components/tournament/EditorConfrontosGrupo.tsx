@@ -219,7 +219,7 @@ export function EditorConfrontosGrupo() {
           <Button
             onClick={salvar}
             disabled={!podeSalvar || salvando}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-blue-600 hover:bg-blue-700"
           >
             {salvando ? "Salvando..." : "Salvar confrontos"}
           </Button>

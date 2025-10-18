@@ -1,0 +1,15 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Permite leitura e escrita pública de logos (para desenvolvimento)
+    match /logos/{teamId}/{allPaths=**} {
+      allow read, write: if true;
+    }
+    
+    // Permite acesso geral para desenvolvimento
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}

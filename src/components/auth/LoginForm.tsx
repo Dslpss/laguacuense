@@ -51,7 +51,7 @@ export function LoginForm({ onLoginSucesso }: LoginFormProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMDkgMS43OTEtNCA0LTRzNCAxLjc5MSA0IDQtMS43OTEgNC00IDQtNC0xLjc5MS00LTR6bTAgMjRjMC0yLjIwOSAxLjc5MS00IDQtNHM0IDEuNzkxIDQgNC0xLjc5MSA0LTQgNC00LTEuNzkxLTQtNHptLTI0IDRjLTIuMjA5IDAtNC0xLjc5MS00LTRzMS43OTEtNCA0LTQgNCAxLjc5MSA0IDQtMS43OTEgNC00IDR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
 
@@ -64,21 +64,21 @@ export function LoginForm({ onLoginSucesso }: LoginFormProps) {
               <div className="absolute inset-0 blur-xl bg-yellow-400 opacity-50"></div>
             </div>
             <div className="relative">
-              <Users className="h-12 w-12 text-green-400 drop-shadow-lg" />
-              <div className="absolute inset-0 blur-xl bg-green-400 opacity-50"></div>
+              <Users className="h-12 w-12 text-blue-400 drop-shadow-lg" />
+              <div className="absolute inset-0 blur-xl bg-blue-400 opacity-50"></div>
             </div>
           </div>
           <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
             Campeonato Lagoacuense
           </h1>
-          <p className="text-green-200 font-medium">
+          <p className="text-blue-200 font-medium">
             Sistema de Gerenciamento 2025
           </p>
         </div>
 
         <Card className="shadow-2xl border-0 backdrop-blur-sm bg-white/95">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
               Acesso Administrativo
             </CardTitle>
             <CardDescription className="text-center text-base">
@@ -121,7 +121,7 @@ export function LoginForm({ onLoginSucesso }: LoginFormProps) {
                   placeholder="seu.email@exemplo.com"
                   disabled={carregando}
                   required
-                  className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 transition-all"
+                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                 />
               </div>
 
@@ -140,14 +140,14 @@ export function LoginForm({ onLoginSucesso }: LoginFormProps) {
                   placeholder="••••••••••"
                   disabled={carregando}
                   required
-                  className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 transition-all"
+                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                 />
               </div>
 
               <Button
                 type="submit"
                 disabled={carregando}
-                className="w-full h-12 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-base"
               >
                 {carregando ? (
                   <div className="flex items-center gap-2">
@@ -176,9 +176,9 @@ export function LoginForm({ onLoginSucesso }: LoginFormProps) {
             </form>
 
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="flex items-center justify-center gap-2 text-sm text-green-700">
+              <div className="flex items-center justify-center gap-2 text-sm text-blue-700">
                 <svg
-                  className="h-4 w-4 text-green-600"
+                  className="h-4 w-4 text-blue-600"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >

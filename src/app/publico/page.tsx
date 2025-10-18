@@ -71,7 +71,7 @@ export default function PaginaPublica() {
   const jogadoresMap = useJogadoresPorIds(jogadorIds, timeIds);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -573,9 +573,9 @@ export default function PaginaPublica() {
               </div>
 
               {/* Informações Gerais */}
-              <div className="space-y-4 bg-white p-6 rounded-xl shadow-md border border-green-100 hover:shadow-lg transition-shadow">
+              <div className="space-y-4 bg-white p-6 rounded-xl shadow-md border border-blue-100 hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="bg-gradient-to-br from-green-500 to-green-600 p-2 rounded-lg shadow">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-lg shadow">
                     <svg
                       className="h-6 w-6 text-white"
                       fill="none"
@@ -595,39 +595,39 @@ export default function PaginaPublica() {
                   </h4>
                 </div>
                 <ul className="space-y-3 text-gray-700">
-                  <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
-                    <span className="text-green-600 font-bold text-xl shrink-0">
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                    <span className="text-blue-600 font-bold text-xl shrink-0">
                       ⚽
                     </span>
                     <span className="font-medium pt-0.5">
                       16 times distribuídos em 4 grupos (A, B, C, D)
                     </span>
                   </li>
-                  <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
-                    <span className="text-green-600 font-bold text-xl shrink-0">
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                    <span className="text-blue-600 font-bold text-xl shrink-0">
                       🏆
                     </span>
                     <span className="font-medium pt-0.5">
                       Os 2 melhores de cada grupo se classificam
                     </span>
                   </li>
-                  <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
-                    <span className="text-green-600 font-bold text-xl shrink-0">
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                    <span className="text-blue-600 font-bold text-xl shrink-0">
                       🎲
                     </span>
                     <span className="font-medium pt-0.5">
                       Semifinais definidas por sorteio
                     </span>
                   </li>
-                  <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
-                    <span className="text-green-600 font-bold text-xl shrink-0">
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                    <span className="text-blue-600 font-bold text-xl shrink-0">
                       ⏱️
                     </span>
                     <span className="font-medium pt-0.5">
                       Tolerância de 15 minutos para início dos jogos
                     </span>
                   </li>
-                  <li className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-br from-green-100 to-blue-100 border border-green-300">
+                  <li className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 border border-blue-300">
                     <span className="text-blue-600 font-bold text-xl shrink-0">
                       👤
                     </span>
@@ -640,7 +640,7 @@ export default function PaginaPublica() {
             </div>
 
             {/* Footer do Modal */}
-            <div className="mt-6 pt-6 border-t border-green-200 text-center">
+            <div className="mt-6 pt-6 border-t border-blue-200 text-center">
               <p className="text-sm text-gray-600 font-medium">
                 📋 Regulamento oficial do Campeonato Lagoacuense de Futebol 2025
               </p>

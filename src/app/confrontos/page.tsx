@@ -208,7 +208,7 @@ export default function ConfrontosPage() {
   };
 
   const conteudo = (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <div className="container mx-auto py-8 px-4 space-y-6">
         <div className="flex items-center justify-between mb-6">
           <Link href="/">
@@ -225,7 +225,7 @@ export default function ConfrontosPage() {
                 disabled={finalizando || !podeFinalizarGrupos}
                 className={`gap-2 ${
                   podeFinalizarGrupos 
-                    ? "bg-green-600 hover:bg-green-700" 
+                    ? "bg-blue-600 hover:bg-blue-700" 
                     : "bg-gray-400"
                 }`}
               >
@@ -346,7 +346,7 @@ export default function ConfrontosPage() {
 
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white mb-2">Confrontos</h1>
-          <p className="text-green-200">
+          <p className="text-blue-200">
             Registre placares e eventos por jogador.
           </p>
         </div>
@@ -379,13 +379,13 @@ export default function ConfrontosPage() {
               <p className="text-white font-bold text-lg">
                 Liga Esportiva Lagoacuense
               </p>
-              <p className="text-green-200 font-medium">
+              <p className="text-blue-200 font-medium">
                 Diretor de Esportes:{" "}
                 <span className="text-white">
                   Christiano Texeira dos Santos
                 </span>
               </p>
-              <p className="text-green-300/80 text-sm max-w-md mx-auto">
+              <p className="text-blue-300/80 text-sm max-w-md mx-auto">
                 Sistema desenvolvido para gestão e acompanhamento do Campeonato
                 Lagoacuense 2025
               </p>

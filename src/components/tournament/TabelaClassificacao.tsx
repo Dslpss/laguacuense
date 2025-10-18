@@ -72,34 +72,42 @@ export function TabelaClassificacao() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-white/10 hover:bg-white/5">
-                          <TableHead className="w-8 sticky left-0 bg-slate-900/80 text-green-200 font-semibold">
+                          <TableHead className="w-8 sticky left-0 bg-slate-900/80 text-blue-200 font-semibold">
                             #
                           </TableHead>
-                          <TableHead className="sticky left-8 bg-slate-900/80 min-w-[120px] text-green-200 font-semibold">
+                          <TableHead className="sticky left-8 bg-slate-900/80 min-w-[120px] text-blue-200 font-semibold">
                             Time
                           </TableHead>
-                          <TableHead className="text-center text-green-200 font-semibold">P</TableHead>
-                          <TableHead className="text-center hidden sm:table-cell text-green-200 font-semibold">
+                          <TableHead className="text-center text-blue-200 font-semibold">P</TableHead>
+                          <TableHead className="text-center hidden sm:table-cell text-blue-200 font-semibold">
                             J
                           </TableHead>
-                          <TableHead className="text-center text-green-200 font-semibold">V</TableHead>
-                          <TableHead className="text-center hidden sm:table-cell text-green-200 font-semibold">
+                          <TableHead className="text-center text-blue-200 font-semibold">V</TableHead>
+                          <TableHead className="text-center hidden sm:table-cell text-blue-200 font-semibold">
                             E
                           </TableHead>
-                          <TableHead className="text-center hidden sm:table-cell text-green-200 font-semibold">
+                          <TableHead className="text-center hidden sm:table-cell text-blue-200 font-semibold">
                             D
                           </TableHead>
-                          <TableHead className="text-center hidden md:table-cell text-green-200 font-semibold">
+                          <TableHead className="text-center hidden md:table-cell text-blue-200 font-semibold">
                             GM
                           </TableHead>
-                          <TableHead className="text-center hidden md:table-cell text-green-200 font-semibold">
+                          <TableHead className="text-center hidden md:table-cell text-blue-200 font-semibold">
                             GS
                           </TableHead>
-                          <TableHead className="text-center text-green-200 font-semibold">SG</TableHead>
+                          <TableHead className="text-center text-blue-200 font-semibold">SG</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {timesDoGrupo.map((time, index) => (
+                        {timesDoGrupo.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={10}>
+                              <div className="text-center py-8 text-blue-300">
+                                Nenhum time encontrado neste grupo
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ) : timesDoGrupo.map((time, index) => (
                           <TableRow key={time.timeId} className="border-white/10 hover:bg-white/5">
                             <TableCell className="font-medium sticky left-0 bg-slate-900/80 text-yellow-100">
                               {index + 1}
@@ -132,38 +140,29 @@ export function TabelaClassificacao() {
                                 <span className="text-yellow-100 font-medium">{time.nomeTime}</span>
                               </div>
                             </TableCell>
-                            <TableCell className="text-center font-bold text-yellow-100">
+                            <TableCell className="text-center text-blue-200 font-bold">
                               {time.pontos}
                             </TableCell>
-                            <TableCell className="text-center hidden sm:table-cell text-green-200">
+                            <TableCell className="text-center hidden sm:table-cell text-blue-200">
                               {time.jogos}
                             </TableCell>
-                            <TableCell className="text-center text-green-200">
+                            <TableCell className="text-center text-blue-200">
                               {time.vitorias}
                             </TableCell>
-                            <TableCell className="text-center hidden sm:table-cell text-green-200">
+                            <TableCell className="text-center hidden sm:table-cell text-blue-200">
                               {time.empates}
                             </TableCell>
-                            <TableCell className="text-center hidden sm:table-cell text-green-200">
+                            <TableCell className="text-center hidden sm:table-cell text-blue-200">
                               {time.derrotas}
                             </TableCell>
-                            <TableCell className="text-center hidden md:table-cell text-green-200">
+                            <TableCell className="text-center hidden md:table-cell text-blue-200">
                               {time.golsMarcados}
                             </TableCell>
-                            <TableCell className="text-center hidden md:table-cell text-green-200">
+                            <TableCell className="text-center hidden md:table-cell text-blue-200">
                               {time.golsSofridos}
                             </TableCell>
-                            <TableCell className="text-center">
-                              <span
-                                className={
-                                  time.saldoGols >= 0
-                                    ? "text-green-400 font-semibold"
-                                    : "text-red-400 font-semibold"
-                                }
-                              >
-                                {time.saldoGols > 0 ? "+" : ""}
-                                {time.saldoGols}
-                              </span>
+                            <TableCell className="text-center text-blue-400 font-bold">
+                              {time.saldoGols > 0 ? '+' : ''}{time.saldoGols}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -232,12 +231,29 @@ export function TabelaClassificacao() {
                 </div>
                 <h3 className="text-yellow-200 font-bold text-sm">Visualização Responsiva</h3>
               </div>
-              <p className="text-green-300 text-xs leading-relaxed">
-                <em>
-                  Em dispositivos móveis e telas pequenas, algumas colunas ficam ocultas para melhor visualização. 
-                  Role horizontalmente na tabela para ver todas as estatísticas disponíveis.
-                </em>
-              </p>
+              <p className="text-blue-300 text-xs leading-relaxed">
+                 <em>
+                   Em dispositivos móveis e telas pequenas, algumas colunas ficam ocultas para melhor visualização. 
+                   Role horizontalmente na tabela para ver todas as estatísticas disponíveis.
+                 </em>
+               </p>
+              <div className="flex flex-wrap gap-3 mt-3">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    Classificado
+                  </span>
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    Zona de Classificação
+                  </span>
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-sm">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    Eliminado
+                  </span>
+                </div>
+                <p className="text-blue-200 text-sm mt-2">
+                  * Os 2 primeiros de cada grupo se classificam para as semifinais
+                </p>
             </div>
 
             {/* Critérios de Desempate */}

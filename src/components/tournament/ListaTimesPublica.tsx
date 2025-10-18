@@ -108,14 +108,14 @@ export function ListaTimesPublica() {
                 {timesPorGrupo[grupo].map((time) => (
                 <div
                   key={time.id}
-                  className="group bg-gradient-to-br from-slate-900 via-green-950 to-slate-900 rounded-xl border-2 border-green-700/40 shadow-lg hover:shadow-2xl hover:scale-105 transition-all p-5"
+                  className="group bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl border-2 border-blue-700/40 shadow-lg hover:shadow-2xl hover:scale-105 transition-all p-5"
                 >
                   <div className="space-y-4">
                     <div className="flex flex-col items-center gap-4">
                       {time.logoUrl ? (
                         <div className="relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-green-700/40 to-green-500/20 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                          <div className="relative bg-slate-900 p-3 rounded-2xl border-2 border-green-700/40 shadow-md">
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-700/40 to-blue-500/20 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                          <div className="relative bg-slate-900 p-3 rounded-2xl border-2 border-blue-700/40 shadow-md">
                             <Image
                               src={time.logoUrl}
                               alt={"Logo de " + time.nome}

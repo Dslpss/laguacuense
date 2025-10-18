@@ -58,22 +58,91 @@ export function ListaTimes() {
     setLogoDialogOpen(true);
   };
 
+
+
+  // Função para converter arquivo para base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const salvarLogo = async () => {
-    if (!logoTimeSelecionado) return;
+    if (!logoTimeSelecionado) {
+      console.log("❌ Erro: logoTimeSelecionado é null");
+      return;
+    }
+    
+    console.log("🚀 Iniciando salvamento da logo...");
+    console.log("📁 Arquivo selecionado:", logoFile);
+    console.log("🏆 Time selecionado:", logoTimeSelecionado);
+    
     setSalvandoLogo(true);
     try {
       let logoUrl = logoTimeSelecionado.logoUrl || "";
+      
       if (logoFile) {
-        // Upload real para Firebase Storage
-        logoUrl = await uploadLogo(logoFile, logoTimeSelecionado.id);
+        console.log("🔄 Convertendo imagem para base64...");
+        console.log("📄 Detalhes do arquivo:", {
+          name: logoFile.name,
+          size: logoFile.size,
+          type: logoFile.type
+        });
+        
+        // Validar tipo de arquivo
+        if (!logoFile.type.startsWith('image/')) {
+          throw new Error('Por favor, selecione apenas arquivos de imagem');
+        }
+        
+        // Validar tamanho do arquivo (2MB max para base64)
+        if (logoFile.size > 2 * 1024 * 1024) {
+          throw new Error('O arquivo deve ter no máximo 2MB para conversão base64');
+        }
+        
+        // Converter para base64
+        logoUrl = await fileToBase64(logoFile);
+        console.log("✅ Conversão para base64 concluída!");
+        console.log("📏 Tamanho do base64:", logoUrl.length, "caracteres");
+      } else {
+        console.log("⚠️ Nenhum arquivo selecionado, mantendo URL atual");
+        // Se não há arquivo e não há URL atual, não faz nada
+        if (!logoUrl) {
+          console.log("ℹ️ Nenhuma alteração necessária - sem arquivo e sem URL atual");
+          alert("Nenhuma alteração foi feita");
+          setLogoDialogOpen(false);
+          return;
+        }
       }
+      
+      console.log("💾 Atualizando time no Firestore...");
       await atualizarTime(logoTimeSelecionado.id, { logoUrl });
-      alert("Logo atualizada!");
+      console.log("✅ Time atualizado com sucesso!");
+      
+      const mensagem = logoFile ? "Logo atualizada com sucesso!" : "Logo mantida";
+      alert(mensagem);
       setLogoDialogOpen(false);
+      
+      // Limpar estados
+      setLogoFile(null);
+      setLogoPreview("");
+      setLogoTimeSelecionado(null);
+      
     } catch (error) {
-      console.error("Erro ao salvar logo:", error);
-      alert("Erro ao salvar logo");
+      console.error("❌ Erro detalhado ao salvar logo:", error);
+      console.error("📊 Stack trace:", error instanceof Error ? error.stack : 'N/A');
+      
+      // Mensagens de erro mais específicas
+      let mensagemErro = "Erro desconhecido";
+      if (error instanceof Error) {
+        mensagemErro = error.message;
+      }
+      
+      alert(`Erro ao salvar logo: ${mensagemErro}`);
     } finally {
+      console.log("🏁 Finalizando processo de salvamento...");
       setSalvandoLogo(false);
     }
   };
@@ -219,6 +288,7 @@ export function ListaTimes() {
             </Badge>
           )}
         </CardDescription>
+
       </CardHeader>
       <CardContent>
         {times.length === 0 ? (
@@ -433,7 +503,7 @@ export function ListaTimes() {
             </Button>
             <Button
               onClick={salvarLogo}
-              disabled={salvandoLogo || !logoFile}
+              disabled={salvandoLogo}
               className="h-11 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all"
             >
               {salvandoLogo ? (
