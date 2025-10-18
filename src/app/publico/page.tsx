@@ -43,6 +43,8 @@ export default function PaginaPublica() {
   const [golsJogos, setGolsJogos] = useState<
     Array<{ jogadorId: string; timeId: string }>
   >([]);
+  // Expand/collapse de gols por jogo (público)
+  const [golsExpandidoPorJogo, setGolsExpandidoPorJogo] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const unsubList: (() => void)[] = [];
@@ -347,7 +349,7 @@ export default function PaginaPublica() {
                       return (
                         <div
                           key={jogo.id}
-                          className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl p-6 shadow-xl border border-blue-900/40"
+                          className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl p-6 shadow-xl border border-blue-900/40 relative overflow-hidden"
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm text-blue-200 font-semibold">
@@ -384,7 +386,7 @@ export default function PaginaPublica() {
                               </span>
                               {jogo.finalizado && (
                                 <span
-                                  className={`mt-2 px-3 py-1 rounded-full text-xs font-bold ${
+                                  className={`mt-2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
                                     vencedor === "Empate"
                                       ? "bg-gray-700 text-gray-200"
                                       : "bg-blue-700 text-white"
@@ -397,29 +399,63 @@ export default function PaginaPublica() {
                               )}
                               {/* Gols marcados */}
                               {gols.length > 0 && (
-                                <div className="mt-3 text-xs text-blue-200 text-center">
-                                  <div className="font-bold mb-1">
-                                    Gols marcados:
+                                <div className="mt-3 text-xs text-blue-200">
+                                  <div className="flex items-center justify-center gap-2 font-bold">
+                                    <span>Gols marcados</span>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
+                                      onClick={() =>
+                                        setGolsExpandidoPorJogo((prev) => ({
+                                          ...prev,
+                                          [jogo.id]: !prev[jogo.id],
+                                        }))
+                                      }
+                                    >
+                                      {golsExpandidoPorJogo[jogo.id] ? "Ocultar" : "Mostrar"}
+                                    </Button>
                                   </div>
-                                  <ul className="space-y-1">
-                                    {gols.map((gol) => (
-                                      <li key={gol.id}>
-                                        <span className="font-semibold">
-                                          {gol.timeId === timeA?.id
-                                            ? timeA?.nome
-                                            : timeB?.nome}
-                                        </span>{" "}
-                                        - Jogador:{" "}
-                                        <span className="font-bold">
-                                          {jogadoresMap[gol.jogadorId]?.nome ??
-                                            gol.jogadorId}
-                                        </span>
-                                        {gol.minuto !== undefined && (
-                                          <> ({gol.minuto}&apos;)</>
-                                        )}
-                                      </li>
-                                    ))}
-                                  </ul>
+                                  {golsExpandidoPorJogo[jogo.id] && (
+                                    <div className="absolute inset-0 z-10 p-6">
+                                      <div className="bg-blue-950/90 backdrop-blur rounded-lg p-3 border border-blue-800/40 shadow-lg h-full flex flex-col">
+                                        <div className="flex items-center justify-between font-bold text-blue-100 mb-2">
+                                          <span className="text-xs">Gols marcados</span>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
+                                            onClick={() =>
+                                              setGolsExpandidoPorJogo((prev) => ({ ...prev, [jogo.id]: false }))
+                                            }
+                                          >
+                                            Fechar
+                                          </Button>
+                                        </div>
+                                        <div className="flex-1 overflow-y-auto pr-1">
+                                          <ul className="space-y-1 text-center text-xs text-blue-100">
+                                            {gols.map((gol) => (
+                                              <li key={gol.id}>
+                                                <span className="font-semibold">
+                                                  {gol.timeId === timeA?.id
+                                                    ? timeA?.nome
+                                                    : timeB?.nome}
+                                                </span>{" "}
+                                                - Jogador:{" "}
+                                                <span className="font-bold">
+                                                  {jogadoresMap[gol.jogadorId]?.nome ??
+                                                    gol.jogadorId}
+                                                </span>
+                                                {gol.minuto !== undefined && (
+                                                  <> ({gol.minuto}&apos;)</>
+                                                )}
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
