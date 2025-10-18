@@ -210,14 +210,14 @@ export default function ConfrontosPage() {
   const conteudo = (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <div className="container mx-auto py-8 px-4 space-y-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
           <Link href="/">
             <Button variant="outline" className="gap-2">
               ← Voltar
             </Button>
           </Link>
           
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap flex-col md:flex-row">
             {/* Botão para finalizar fase de grupos */}
             {!jaTemQuartas && (
               <Button
@@ -314,33 +314,7 @@ export default function ConfrontosPage() {
               </div>
             )}
             
-            {/* Botão para remover todos os jogos */}
-            {jogos.length > 0 && (
-              <Button
-                variant="destructive"
-                onClick={async () => {
-                  if (
-                    !confirm(
-                      `Tem certeza que deseja remover TODOS os ${jogos.length} confrontos? Esta ação não pode ser desfeita.`
-                    )
-                  )
-                    return;
-                  setRemovendo(true);
-                  try {
-                    await removerTodosJogos();
-                    alert("Todos os confrontos foram removidos!");
-                  } catch (e) {
-                    console.error(e);
-                    alert("Erro ao remover confrontos.");
-                  } finally {
-                    setRemovendo(false);
-                  }
-                }}
-                disabled={removendo}
-              >
-                {removendo ? "Removendo..." : "🗑️ Remover todos"}
-              </Button>
-            )}
+            {/* Botão para remover todos movido para o final da página */}
           </div>
         </div>
 
@@ -360,6 +334,31 @@ export default function ConfrontosPage() {
             jogos.map((j) => <ConfrontoEditor key={j.id} jogo={j} />)
           )}
         </div>
+
+        {jogos.length > 0 && (
+          <div className="mt-10 pt-6 border-t border-red-500/20 flex justify-center">
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!confirm(`Tem certeza que deseja remover TODOS os ${jogos.length} confrontos? Esta ação não pode ser desfeita.`)) return;
+                setRemovendo(true);
+                try {
+                  await removerTodosJogos();
+                  alert("Todos os confrontos foram removidos!");
+                } catch (e) {
+                  console.error(e);
+                  alert("Erro ao remover confrontos.");
+                } finally {
+                  setRemovendo(false);
+                }
+              }}
+              disabled={removendo}
+              className="w-full md:w-auto max-w-sm"
+            >
+              {removendo ? "Removendo..." : "🗑️ Remover todos"}
+            </Button>
+          </div>
+        )}
 
         {/* Footer Premium */}
         <div className="mt-16 pt-12 border-t border-white/20">

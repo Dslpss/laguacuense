@@ -55,6 +55,7 @@ export function ConfrontoEditor({ jogo }: Props) {
   const [jogadorId, setJogadorId] = useState<string>("");
   const [minuto, setMinuto] = useState<string>("");
   const [eventos, setEventos] = useState<Evento[]>([]);
+  const [mostrarEventos, setMostrarEventos] = useState(false);
 
   useEffect(() => {
     const unsub = obterEventosJogo(jogo.id, (ev) =>
@@ -127,7 +128,7 @@ export function ConfrontoEditor({ jogo }: Props) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex flex-col gap-1">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 flex-wrap break-words">
             {nomeTimeA} × {nomeTimeB} {jogo.grupo ? `• Grupo ${jogo.grupo}` : ""}
             {jogo.finalizado && (
               <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
@@ -150,7 +151,7 @@ export function ConfrontoEditor({ jogo }: Props) {
         </div>
         <Button
           variant="destructive"
-          size="sm"
+          className="h-10 px-4"
           onClick={removerConfrontoCompleto}
         >
           🗑️ Remover confronto
@@ -159,7 +160,7 @@ export function ConfrontoEditor({ jogo }: Props) {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
           <div>
-            <Label>{nomeTimeA} (gols)</Label>
+            <Label className="mb-1 leading-tight">{nomeTimeA} (gols)</Label>
             <Input
               type="number"
               min={0}
@@ -169,7 +170,7 @@ export function ConfrontoEditor({ jogo }: Props) {
             />
           </div>
           <div>
-            <Label>{nomeTimeB} (gols)</Label>
+            <Label className="mb-1 leading-tight">{nomeTimeB} (gols)</Label>
             <Input
               type="number"
               min={0}
@@ -184,7 +185,7 @@ export function ConfrontoEditor({ jogo }: Props) {
           </div>
           <div className="space-y-2">
             <Button
-              className="w-full bg-green-600 hover:bg-green-700"
+              className="w-full h-10"
               onClick={salvarPlacar}
               disabled={salvando || salvo}
             >
@@ -196,7 +197,7 @@ export function ConfrontoEditor({ jogo }: Props) {
             </Button>
             {jogo.finalizado && (
               <Button
-                className="w-full bg-yellow-600 hover:bg-yellow-700"
+                className="w-full h-10"
                 onClick={async () => {
                   try {
                     await atualizarJogo(jogo.id, { finalizado: false });
@@ -223,9 +224,9 @@ export function ConfrontoEditor({ jogo }: Props) {
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
           <div>
-            <Label>Time</Label>
+            <Label className="mb-1 leading-tight">Time</Label>
             <Select value={lado} onValueChange={(v) => setLado(v as "A" | "B")}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -235,12 +236,12 @@ export function ConfrontoEditor({ jogo }: Props) {
             </Select>
           </div>
           <div>
-            <Label>Evento</Label>
+            <Label className="mb-1 leading-tight">Evento</Label>
             <Select
               value={tipoEvento}
               onValueChange={(v) => setTipoEvento(v as EventoTipo)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -251,9 +252,9 @@ export function ConfrontoEditor({ jogo }: Props) {
             </Select>
           </div>
           <div>
-            <Label>Jogador</Label>
+            <Label className="mb-1 leading-tight">Jogador</Label>
             <Select value={jogadorId} onValueChange={(v) => setJogadorId(v)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione o jogador" />
               </SelectTrigger>
               <SelectContent>
@@ -268,7 +269,7 @@ export function ConfrontoEditor({ jogo }: Props) {
             </Select>
           </div>
           <div>
-            <Label>Minuto (opcional)</Label>
+            <Label className="mb-1 leading-tight">Minuto (opcional)</Label>
             <Input
               type="number"
               min={0}
@@ -278,73 +279,80 @@ export function ConfrontoEditor({ jogo }: Props) {
             />
           </div>
           <div>
-            <Button className="w-full" onClick={adicionarEvento}>
+            <Button className="w-full h-10" onClick={adicionarEvento}>
               Adicionar evento
             </Button>
           </div>
         </div>
 
         <div className="mt-8">
-          <h4 className="font-semibold mb-3 text-lg">
-            Todos os eventos do confronto
-          </h4>
-          <ul className="space-y-2 text-sm">
-            {eventos.length === 0 ? (
-              <li className="text-gray-400">Nenhum evento adicionado ainda.</li>
-            ) : (
-              eventos
-                .sort((a, b) => (a.minuto ?? 0) - (b.minuto ?? 0))
-                .map((e) => {
-                  const jogador = [...jogA, ...jogB].find(
-                    (j) => j.id === e.jogadorId
-                  );
-                  const timeNome =
-                    e.timeId === jogo.timeA ? nomeTimeA : nomeTimeB;
-                  let tipoLabel = "";
-                  if (e.tipo === "gol") tipoLabel = "Gol";
-                  else if (e.tipo === "amarelo") tipoLabel = "Cartão amarelo";
-                  else if (e.tipo === "vermelho") tipoLabel = "Cartão vermelho";
-                  return (
-                    <li
-                      key={e.id}
-                      className="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-2"
-                    >
-                      <span>
-                        <span
-                          className={`font-bold mr-2 ${
-                            e.tipo === "gol"
-                              ? "text-green-400"
-                              : e.tipo === "amarelo"
-                              ? "text-yellow-400"
-                              : "text-red-400"
-                          }`}
-                        >
-                          {tipoLabel}
-                        </span>
-                        <span className="font-medium text-white">
-                          {jogador?.nome ?? e.jogadorId}
-                        </span>
-                        {e.minuto ? (
-                          <span className="ml-2 text-blue-300">
-                            ({e.minuto}&#39;)
-                          </span>
-                        ) : null}
-                        <span className="ml-2 text-xs text-gray-400">
-                          [{timeNome}]
-                        </span>
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removerEvt(e.id)}
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold text-lg">Eventos do confronto</h4>
+            <Button
+              variant="outline"
+              onClick={() => setMostrarEventos((v) => !v)}
+              className="h-10 px-4 gap-2"
+            >
+              {mostrarEventos ? "Ocultar eventos" : `Mostrar eventos (${eventos.length})`}
+            </Button>
+          </div>
+          {mostrarEventos && (
+            <ul className="space-y-2 text-sm">
+              {eventos.length === 0 ? (
+                <li className="text-gray-400">Nenhum evento adicionado ainda.</li>
+              ) : (
+                eventos
+                  .sort((a, b) => (a.minuto ?? 0) - (b.minuto ?? 0))
+                  .map((e) => {
+                    const jogador = [...jogA, ...jogB].find(
+                      (j) => j.id === e.jogadorId
+                    );
+                    const timeNome =
+                      e.timeId === jogo.timeA ? nomeTimeA : nomeTimeB;
+                    let tipoLabel = "";
+                    if (e.tipo === "gol") tipoLabel = "Gol";
+                    else if (e.tipo === "amarelo") tipoLabel = "Cartão amarelo";
+                    else if (e.tipo === "vermelho") tipoLabel = "Cartão vermelho";
+                    return (
+                      <li
+                        key={e.id}
+                        className="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-2"
                       >
-                        Remover
-                      </Button>
-                    </li>
-                  );
-                })
-            )}
-          </ul>
+                        <span>
+                          <span
+                            className={`font-bold mr-2 ${
+                              e.tipo === "gol"
+                                ? "text-green-400"
+                                : e.tipo === "amarelo"
+                                ? "text-yellow-400"
+                                : "text-red-400"
+                            }`}
+                          >
+                            {tipoLabel}
+                          </span>
+                          <span className="font-medium text-white">
+                            {jogador?.nome ?? e.jogadorId}
+                          </span>
+                          {e.minuto ? (
+                            <span className="ml-2 text-blue-300">({e.minuto}&#39;)
+                            </span>
+                          ) : null}
+                          <span className="ml-2 text-xs text-gray-400">[{timeNome}]
+                          </span>
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removerEvt(e.id)}
+                        >
+                          Remover
+                        </Button>
+                      </li>
+                    );
+                  })
+              )}
+            </ul>
+          )}
         </div>
       </CardContent>
     </Card>
