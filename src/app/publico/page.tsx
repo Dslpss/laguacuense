@@ -34,6 +34,10 @@ export default function PaginaPublica() {
     {} as Record<string, import("@/types").Time>
   );
 
+  // Adicionar estado de paginação
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const PAGE_SIZE = 6;
+
   // Estado para eventos de todos os jogos
   const [eventosJogos, setEventosJogos] = useState<
     Record<string, import("@/lib/firebase/eventos").EventoJogo[]>
@@ -67,10 +71,23 @@ export default function PaginaPublica() {
     };
   }, [jogos]);
 
+  // Garantir que a página atual seja válida quando a quantidade de jogos mudar
+  useEffect(() => {
+    const total = Math.max(1, Math.ceil(jogos.length / PAGE_SIZE));
+    if (paginaAtual > total) {
+      setPaginaAtual(total);
+    }
+  }, [jogos.length]);
+
   // Buscar nomes dos jogadores de todos os gols
   const jogadorIds = golsJogos.map((g) => g.jogadorId);
   const timeIds = golsJogos.map((g) => g.timeId);
   const jogadoresMap = useJogadoresPorIds(jogadorIds, timeIds);
+
+  // Variáveis de paginação calculadas fora do JSX
+  const totalPaginas = Math.max(1, Math.ceil(jogos.length / PAGE_SIZE));
+  const inicio = (paginaAtual - 1) * PAGE_SIZE;
+  const jogosVisiveis = jogos.slice(inicio, inicio + PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
@@ -331,153 +348,180 @@ export default function PaginaPublica() {
                     Nenhum confronto cadastrado ainda.
                   </p>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                    {jogos.map((jogo) => {
-                      const timeA = timesMap[jogo.timeA];
-                      const timeB = timesMap[jogo.timeB];
-                      const golsA = jogo.golsTimeA ?? 0;
-                      const golsB = jogo.golsTimeB ?? 0;
-                      let vencedor = null;
-                      if (jogo.finalizado) {
-                        if (golsA > golsB) vencedor = timeA?.nome;
-                        else if (golsB > golsA) vencedor = timeB?.nome;
-                        else vencedor = "Empate";
-                      }
-                      // Eventos do jogo
-                      const eventos = eventosJogos[jogo.id] || [];
-                      const gols = eventos.filter((ev) => ev.tipo === "gol");
-                      return (
-                        <div
-                          key={jogo.id}
-                          className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl p-4 pl-6 sm:p-6 shadow-xl border border-blue-900/40 relative overflow-hidden"
-                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs sm:text-sm text-blue-200 font-semibold">
-                              {jogo.fase === "grupos"
-                                ? `Grupo ${jogo.grupo}`
-                                : jogo.fase.charAt(0).toUpperCase() +
-                                  jogo.fase.slice(1)}
-                            </span>
-                            <span className="text-xs text-blue-400">
-                              {jogo.dataJogo
-                                ?.toDate?.()
-                                .toLocaleString?.("pt-BR")}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between gap-2 sm:gap-4 px-2 sm:px-3">
-                            <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
-                              <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
-                                {timeA?.nome ?? "Time A"}
-                              </span>
-                              {timeA?.logoUrl && (
-                                <Image
-                                  src={timeA.logoUrl}
-                                  alt={timeA.nome}
-                                  width={48}
-                                  height={48}
-                                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
-                                />
-                              )}
-                            </div>
-                            <div className="flex flex-col items-center justify-center">
-                              <span className="text-lg sm:text-2xl font-black text-white">
-                                {golsA} <span className="text-blue-400">x</span>{" "}
-                                {golsB}
-                              </span>
-                              {jogo.finalizado && (
-                                <span
-                                  className={`mt-2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                                    vencedor === "Empate"
-                                      ? "bg-gray-700 text-gray-200"
-                                      : "bg-blue-700 text-white"
-                                  }`}
+                  <>
+                    {/* Lista e paginação */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                            {jogosVisiveis.map((jogo) => {
+                              const timeA = timesMap[jogo.timeA];
+                              const timeB = timesMap[jogo.timeB];
+                              const golsA = jogo.golsTimeA ?? 0;
+                              const golsB = jogo.golsTimeB ?? 0;
+                              let vencedor = null as string | null;
+                              if (jogo.finalizado) {
+                                if (golsA > golsB) vencedor = timeA?.nome ?? null;
+                                else if (golsB > golsA) vencedor = timeB?.nome ?? null;
+                                else vencedor = "Empate";
+                              }
+                              // Eventos do jogo
+                              const eventos = eventosJogos[jogo.id] || [];
+                              const gols = eventos.filter((ev) => ev.tipo === "gol");
+                              return (
+                                <div
+                                  key={jogo.id}
+                                  className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl p-4 pl-6 sm:p-6 shadow-xl border border-blue-900/40 relative overflow-hidden"
                                 >
-                                  {vencedor === "Empate"
-                                    ? "Empate"
-                                    : `Vencedor: ${vencedor}`}
-                                </span>
-                              )}
-                              {/* Gols marcados */}
-                              {gols.length > 0 && (
-                                <div className="mt-2 text-xs text-blue-200">
-                                  <div className="flex items-center justify-center gap-2 font-bold">
-                                    <span>Gols marcados</span>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
-                                      onClick={() =>
-                                        setGolsExpandidoPorJogo((prev) => ({
-                                          ...prev,
-                                          [jogo.id]: !prev[jogo.id],
-                                        }))
-                                      }
-                                    >
-                                      {golsExpandidoPorJogo[jogo.id] ? "Ocultar" : "Mostrar"}
-                                    </Button>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs sm:text-sm text-blue-200 font-semibold">
+                                      {jogo.fase === "grupos"
+                                        ? `Grupo ${jogo.grupo}`
+                                        : jogo.fase.charAt(0).toUpperCase() + jogo.fase.slice(1)}
+                                    </span>
+                                    <span className="text-xs text-blue-400">
+                                      {jogo.dataJogo?.toDate?.()?.toLocaleString?.("pt-BR")}
+                                    </span>
                                   </div>
-                                  {golsExpandidoPorJogo[jogo.id] && (
-                                    <div className="absolute inset-0 z-10 p-6">
-                                      <div className="bg-blue-950/90 backdrop-blur rounded-lg p-3 border border-blue-800/40 shadow-lg h-full flex flex-col">
-                                        <div className="flex items-center justify-between font-bold text-blue-100 mb-2">
-                                          <span className="text-xs">Gols marcados</span>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
-                                            onClick={() =>
-                                              setGolsExpandidoPorJogo((prev) => ({ ...prev, [jogo.id]: false }))
-                                            }
-                                          >
-                                            Fechar
-                                          </Button>
-                                        </div>
-                                        <div className="flex-1 overflow-y-auto pr-1">
-                                          <ul className="space-y-1 text-center text-xs text-blue-100">
-                                            {gols.map((gol) => (
-                                              <li key={gol.id}>
-                                                <span className="font-semibold">
-                                                  {gol.timeId === timeA?.id
-                                                    ? timeA?.nome
-                                                    : timeB?.nome}
-                                                </span>{" "}
-                                                - Jogador:{" "}
-                                                <span className="font-bold">
-                                                  {jogadoresMap[gol.jogadorId]?.nome ??
-                                                    gol.jogadorId}
-                                                </span>
-                                                {gol.minuto !== undefined && (
-                                                  <> ({gol.minuto}&apos;)</>
-                                                )}
-                                              </li>
-                                            ))}
-                                          </ul>
-                                        </div>
-                                      </div>
+                                  <div className="flex items-center justify-between gap-2 sm:gap-4 px-2 sm:px-3">
+                                    <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
+                                      <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
+                                        {timeA?.nome ?? "Time A"}
+                                      </span>
+                                      {timeA?.logoUrl && (
+                                        <Image
+                                          src={timeA.logoUrl}
+                                          alt={timeA.nome}
+                                          width={48}
+                                          height={48}
+                                          className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
+                                        />
+                                      )}
                                     </div>
-                                  )}
+                                    <div className="flex flex-col items-center justify-center">
+                                      <span className="text-lg sm:text-2xl font-black text-white">
+                                        {golsA} <span className="text-blue-400">x</span> {golsB}
+                                      </span>
+                                      {jogo.finalizado && (
+                                        <span
+                                          className={`mt-2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
+                                            vencedor === "Empate" ? "bg-gray-700 text-gray-200" : "bg-blue-700 text-white"
+                                          }`}
+                                        >
+                                          {vencedor === "Empate" ? "Empate" : `Vencedor: ${vencedor}`}
+                                        </span>
+                                      )}
+                                      {/* Gols marcados */}
+                                      {gols.length > 0 && (
+                                        <div className="mt-2 text-xs text-blue-200">
+                                          <div className="flex items-center justify-center gap-2 font-bold">
+                                            <span>Gols marcados</span>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
+                                              onClick={() =>
+                                                setGolsExpandidoPorJogo((prev) => ({
+                                                  ...prev,
+                                                  [jogo.id]: !prev[jogo.id],
+                                                }))
+                                              }
+                                            >
+                                              {golsExpandidoPorJogo[jogo.id] ? "Ocultar" : "Mostrar"}
+                                            </Button>
+                                          </div>
+                                          {golsExpandidoPorJogo[jogo.id] && (
+                                            <div className="absolute inset-0 z-10 p-6">
+                                              <div className="bg-blue-950/90 backdrop-blur rounded-lg p-3 border border-blue-800/40 shadow-lg h-full flex flex-col">
+                                                <div className="flex items-center justify-between font-bold text-blue-100 mb-2">
+                                                  <span className="text-xs">Gols marcados</span>
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
+                                                    onClick={() =>
+                                                      setGolsExpandidoPorJogo((prev) => ({ ...prev, [jogo.id]: false }))
+                                                    }
+                                                  >
+                                                    Fechar
+                                                  </Button>
+                                                </div>
+                                                <div className="flex-1 overflow-y-auto pr-1">
+                                                  <ul className="space-y-1 text-center text-xs text-blue-100">
+                                                    {gols.map((gol) => (
+                                                      <li key={gol.id}>
+                                                        <span className="font-semibold">
+                                                          {gol.timeId === timeA?.id ? timeA?.nome : timeB?.nome}
+                                                        </span>{" "}
+                                                        - Jogador:{" "}
+                                                        <span className="font-bold">
+                                                          {jogadoresMap[gol.jogadorId]?.nome ?? gol.jogadorId}
+                                                        </span>
+                                                        {gol.minuto !== undefined && <>( {gol.minuto}&apos;)</>}
+                                                      </li>
+                                                    ))}
+                                                  </ul>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
+                                      <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
+                                        {timeB?.nome ?? "Time B"}
+                                      </span>
+                                      {timeB?.logoUrl && (
+                                        <Image
+                                          src={timeB.logoUrl}
+                                          alt={timeB.nome}
+                                          width={48}
+                                          height={48}
+                                          className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
-                              )}
-                            </div>
-                            <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
-                              <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
-                                {timeB?.nome ?? "Time B"}
-                              </span>
-                              {timeB?.logoUrl && (
-                                <Image
-                                  src={timeB.logoUrl}
-                                  alt={timeB.nome}
-                                  width={48}
-                                  height={48}
-                                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
-                                />
-                              )}
-                            </div>
+                              );
+                            })}
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+
+                          {/* Controles de paginação */}
+                          <div className="flex items-center justify-center gap-2 mt-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40"
+                              disabled={paginaAtual === 1}
+                              onClick={() => setPaginaAtual((p) => Math.max(1, p - 1))}
+                            >
+                              Anterior
+                            </Button>
+                            {Array.from({ length: totalPaginas }, (_, i) => (
+                              <Button
+                                key={i}
+                                variant="ghost"
+                                size="sm"
+                                className={
+                                  paginaAtual === i + 1
+                                    ? "h-7 px-2 bg-blue-700 text-white hover:bg-blue-700"
+                                    : "h-7 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40"
+                                }
+                                onClick={() => setPaginaAtual(i + 1)}
+                              >
+                                {i + 1}
+                              </Button>
+                            ))}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40"
+                              disabled={paginaAtual === totalPaginas}
+                              onClick={() => setPaginaAtual((p) => Math.min(totalPaginas, p + 1))}
+                            >
+                              Próxima
+                            </Button>
+                          </div>
+                  </>
                 )}
               </div>
             </div>
