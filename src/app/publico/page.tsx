@@ -349,10 +349,10 @@ export default function PaginaPublica() {
                       return (
                         <div
                           key={jogo.id}
-                          className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl p-6 shadow-xl border border-blue-900/40 relative overflow-hidden"
-                        >
+                          className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl p-4 pl-6 sm:p-6 shadow-xl border border-blue-900/40 relative overflow-hidden"
+                         >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-blue-200 font-semibold">
+                            <span className="text-xs sm:text-sm text-blue-200 font-semibold">
                               {jogo.fase === "grupos"
                                 ? `Grupo ${jogo.grupo}`
                                 : jogo.fase.charAt(0).toUpperCase() +
@@ -364,9 +364,9 @@ export default function PaginaPublica() {
                                 .toLocaleString?.("pt-BR")}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex-1 flex flex-col items-center">
-                              <span className="text-lg font-bold text-blue-100">
+                          <div className="flex items-center justify-between gap-2 sm:gap-4 px-2 sm:px-3">
+                            <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
+                              <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
                                 {timeA?.nome ?? "Time A"}
                               </span>
                               {timeA?.logoUrl && (
@@ -375,12 +375,12 @@ export default function PaginaPublica() {
                                   alt={timeA.nome}
                                   width={48}
                                   height={48}
-                                  className="w-12 h-12 rounded-full object-cover mt-2"
+                                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
                                 />
                               )}
                             </div>
                             <div className="flex flex-col items-center justify-center">
-                              <span className="text-2xl font-black text-white">
+                              <span className="text-lg sm:text-2xl font-black text-white">
                                 {golsA} <span className="text-blue-400">x</span>{" "}
                                 {golsB}
                               </span>
@@ -399,7 +399,7 @@ export default function PaginaPublica() {
                               )}
                               {/* Gols marcados */}
                               {gols.length > 0 && (
-                                <div className="mt-3 text-xs text-blue-200">
+                                <div className="mt-2 text-xs text-blue-200">
                                   <div className="flex items-center justify-center gap-2 font-bold">
                                     <span>Gols marcados</span>
                                     <Button
@@ -459,8 +459,8 @@ export default function PaginaPublica() {
                                 </div>
                               )}
                             </div>
-                            <div className="flex-1 flex flex-col items-center">
-                              <span className="text-lg font-bold text-blue-100">
+                            <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
+                              <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
                                 {timeB?.nome ?? "Time B"}
                               </span>
                               {timeB?.logoUrl && (
@@ -469,7 +469,7 @@ export default function PaginaPublica() {
                                   alt={timeB.nome}
                                   width={48}
                                   height={48}
-                                  className="w-12 h-12 rounded-full object-cover mt-2"
+                                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
                                 />
                               )}
                             </div>
