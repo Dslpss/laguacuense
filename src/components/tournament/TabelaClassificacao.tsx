@@ -79,20 +79,20 @@ export function TabelaClassificacao() {
                             Time
                           </TableHead>
                           <TableHead className="text-center text-blue-200 font-semibold">P</TableHead>
-                          <TableHead className="text-center hidden sm:table-cell text-blue-200 font-semibold">
+                          <TableHead className="text-center text-blue-200 font-semibold">
                             J
                           </TableHead>
                           <TableHead className="text-center text-blue-200 font-semibold">V</TableHead>
-                          <TableHead className="text-center hidden sm:table-cell text-blue-200 font-semibold">
+                          <TableHead className="text-center text-blue-200 font-semibold">
                             E
                           </TableHead>
-                          <TableHead className="text-center hidden sm:table-cell text-blue-200 font-semibold">
+                          <TableHead className="text-center text-blue-200 font-semibold">
                             D
                           </TableHead>
-                          <TableHead className="text-center hidden md:table-cell text-blue-200 font-semibold">
+                          <TableHead className="text-center text-blue-200 font-semibold">
                             GM
                           </TableHead>
-                          <TableHead className="text-center hidden md:table-cell text-blue-200 font-semibold">
+                          <TableHead className="text-center text-blue-200 font-semibold">
                             GS
                           </TableHead>
                           <TableHead className="text-center text-blue-200 font-semibold">SG</TableHead>
@@ -143,22 +143,22 @@ export function TabelaClassificacao() {
                             <TableCell className="text-center text-blue-200 font-bold">
                               {time.pontos}
                             </TableCell>
-                            <TableCell className="text-center hidden sm:table-cell text-blue-200">
+                            <TableCell className="text-center text-blue-200">
                               {time.jogos}
                             </TableCell>
                             <TableCell className="text-center text-blue-200">
                               {time.vitorias}
                             </TableCell>
-                            <TableCell className="text-center hidden sm:table-cell text-blue-200">
+                            <TableCell className="text-center text-blue-200">
                               {time.empates}
                             </TableCell>
-                            <TableCell className="text-center hidden sm:table-cell text-blue-200">
+                            <TableCell className="text-center text-blue-200">
                               {time.derrotas}
                             </TableCell>
-                            <TableCell className="text-center hidden md:table-cell text-blue-200">
+                            <TableCell className="text-center text-blue-200">
                               {time.golsMarcados}
                             </TableCell>
-                            <TableCell className="text-center hidden md:table-cell text-blue-200">
+                            <TableCell className="text-center text-blue-200">
                               {time.golsSofridos}
                             </TableCell>
                             <TableCell className="text-center text-blue-400 font-bold">
@@ -233,8 +233,8 @@ export function TabelaClassificacao() {
               </div>
               <p className="text-blue-300 text-xs leading-relaxed">
                  <em>
-                   Em dispositivos móveis e telas pequenas, algumas colunas ficam ocultas para melhor visualização. 
-                   Role horizontalmente na tabela para ver todas as estatísticas disponíveis.
+                   Em dispositivos móveis, todas as colunas são exibidas. 
+                   Role horizontalmente na tabela para navegar entre todas as estatísticas disponíveis.
                  </em>
                </p>
               <div className="flex flex-wrap gap-3 mt-3">
