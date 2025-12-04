@@ -25,6 +25,9 @@ export interface Jogo {
   timeB: string; // ID do time
   golsTimeA?: number;
   golsTimeB?: number;
+  // Pênaltis (apenas para fases eliminatórias com empate)
+  penaltisTimeA?: number;
+  penaltisTimeB?: number;
   cartoesAmarelosTimeA?: number;
   cartoesVermelhoTimeA?: number;
   cartoesAmarelosTimeB?: number;

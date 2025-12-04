@@ -126,27 +126,42 @@ export default function PaginaPublica() {
   }, [jogos]);
 
   // Verificar se uma fase está concluída (todos os jogos finalizados)
+  const fasesConcluidas = useMemo(() => {
+    return {
+      final:
+        jogosPorFase.final.length > 0 &&
+        jogosPorFase.final.every((j) => j.finalizado),
+      semifinal:
+        jogosPorFase.semifinal.length > 0 &&
+        jogosPorFase.semifinal.every((j) => j.finalizado),
+      quartas:
+        jogosPorFase.quartas.length > 0 &&
+        jogosPorFase.quartas.every((j) => j.finalizado),
+      grupos:
+        jogosPorFase.grupos.length > 0 &&
+        jogosPorFase.grupos.every((j) => j.finalizado),
+    };
+  }, [jogosPorFase]);
+
   const faseConcluida = (fase: string) => {
-    const jogosF = jogosPorFase[fase] || [];
-    return jogosF.length > 0 && jogosF.every((j) => j.finalizado);
+    return fasesConcluidas[fase as keyof typeof fasesConcluidas] ?? false;
   };
 
   // Identificar a fase atual (primeira fase não concluída com jogos)
   const faseAtual = useMemo(() => {
-    if (jogosPorFase.final.length > 0 && !faseConcluida("final"))
-      return "final";
-    if (jogosPorFase.semifinal.length > 0 && !faseConcluida("semifinal"))
+    if (jogosPorFase.final.length > 0 && !fasesConcluidas.final) return "final";
+    if (jogosPorFase.semifinal.length > 0 && !fasesConcluidas.semifinal)
       return "semifinal";
-    if (jogosPorFase.quartas.length > 0 && !faseConcluida("quartas"))
+    if (jogosPorFase.quartas.length > 0 && !fasesConcluidas.quartas)
       return "quartas";
-    if (jogosPorFase.grupos.length > 0 && !faseConcluida("grupos"))
+    if (jogosPorFase.grupos.length > 0 && !fasesConcluidas.grupos)
       return "grupos";
     // Se todas estão concluídas, mostrar final
     if (jogosPorFase.final.length > 0) return "final";
     if (jogosPorFase.semifinal.length > 0) return "semifinal";
     if (jogosPorFase.quartas.length > 0) return "quartas";
     return "grupos";
-  }, [jogosPorFase]);
+  }, [jogosPorFase, fasesConcluidas]);
 
   // Função para toggle de seção
   const toggleSecao = (fase: string) => {
@@ -159,11 +174,27 @@ export default function PaginaPublica() {
     const timeB = timesMap[jogo.timeB];
     const golsA = jogo.golsTimeA ?? 0;
     const golsB = jogo.golsTimeB ?? 0;
+    const penaltisA = jogo.penaltisTimeA;
+    const penaltisB = jogo.penaltisTimeB;
+    const temPenaltis = penaltisA !== undefined && penaltisB !== undefined;
+    const faseEliminatoria =
+      jogo.fase === "quartas" ||
+      jogo.fase === "semifinal" ||
+      jogo.fase === "final";
+
     let vencedor = null as string | null;
     if (jogo.finalizado) {
-      if (golsA > golsB) vencedor = timeA?.nome ?? null;
-      else if (golsB > golsA) vencedor = timeB?.nome ?? null;
-      else vencedor = "Empate";
+      if (golsA > golsB) {
+        vencedor = timeA?.nome ?? null;
+      } else if (golsB > golsA) {
+        vencedor = timeB?.nome ?? null;
+      } else if (faseEliminatoria && temPenaltis) {
+        // Empate no tempo normal, verificar pênaltis
+        if (penaltisA > penaltisB) vencedor = timeA?.nome ?? null;
+        else if (penaltisB > penaltisA) vencedor = timeB?.nome ?? null;
+      } else {
+        vencedor = "Empate";
+      }
     }
     const eventos = eventosJogos[jogo.id] || [];
     const gols = eventos.filter((ev) => ev.tipo === "gol");
@@ -201,14 +232,29 @@ export default function PaginaPublica() {
             <span className="text-lg sm:text-2xl font-black text-white">
               {golsA} <span className="text-blue-400">x</span> {golsB}
             </span>
+            {/* Placar de pênaltis - destaque quando decidido nos pênaltis */}
+            {jogo.finalizado && temPenaltis && golsA === golsB && (
+              <div className="flex flex-col items-center">
+                <span className="text-xs text-amber-400 font-bold mt-1 flex items-center gap-1">
+                  <span className="text-amber-500">⚽</span>
+                  Pênaltis: {penaltisA} x {penaltisB}
+                </span>
+              </div>
+            )}
             {jogo.finalizado && (
               <span
                 className={`mt-2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
                   vencedor === "Empate"
                     ? "bg-gray-700 text-gray-200"
+                    : temPenaltis && golsA === golsB
+                    ? "bg-amber-600 text-white"
                     : "bg-blue-700 text-white"
                 }`}>
-                {vencedor === "Empate" ? "Empate" : `Vencedor: ${vencedor}`}
+                {vencedor === "Empate"
+                  ? "Empate"
+                  : temPenaltis && golsA === golsB
+                  ? `🏆 ${vencedor} (pên.)`
+                  : `Vencedor: ${vencedor}`}
               </span>
             )}
             {!jogo.finalizado && (

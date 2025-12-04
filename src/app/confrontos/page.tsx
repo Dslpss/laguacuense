@@ -45,6 +45,13 @@ export default function ConfrontosPage() {
   const [finalizando, setFinalizando] = useState(false);
   const [mostrarDefinicaoManual, setMostrarDefinicaoManual] = useState(false);
   const [modalFinalizarGrupos, setModalFinalizarGrupos] = useState(false);
+  const [modalSorteioSemifinais, setModalSorteioSemifinais] = useState(false);
+  const [sorteioSemifinais, setSorteioSemifinais] = useState<{
+    jogo1: { time1: Time; time2: Time };
+    jogo2: { time1: Type; time2: Time };
+  } | null>(null);
+  const [dataSemifinal1, setDataSemifinal1] = useState("");
+  const [dataSemifinal2, setDataSemifinal2] = useState("");
 
   // Estados para expandir/encolher seções
   const [secaoExpandida, setSecaoExpandida] = useState<{
@@ -79,12 +86,24 @@ export default function ConfrontosPage() {
   const finalCompleta = verificarFinalCompleta(jogos);
 
   // Verifica se há campeão
-  const campeao = finalCompleta ? obterCampeao(jogos) : null;
+  let campeao: string | null = null;
+  try {
+    campeao = finalCompleta ? obterCampeao(jogos) : null;
+  } catch {
+    // Final pode estar empatada sem vencedor definido
+    campeao = null;
+  }
 
   // Obtém vencedores das quartas para definição manual das semifinais
-  const vencedoresQuartasIds = quartasCompletas
-    ? obterVencedoresQuartas(jogos)
-    : [];
+  let vencedoresQuartasIds: string[] = [];
+  try {
+    vencedoresQuartasIds = quartasCompletas
+      ? obterVencedoresQuartas(jogos)
+      : [];
+  } catch {
+    // Algum jogo das quartas pode estar empatado sem vencedor definido
+    vencedoresQuartasIds = [];
+  }
   const vencedoresQuartas = vencedoresQuartasIds
     .map((id) => times.find((t) => t.id === id))
     .filter(Boolean) as Time[];
@@ -135,7 +154,18 @@ export default function ConfrontosPage() {
     }
   };
 
-  const finalizarQuartas = async () => {
+  // Função auxiliar para embaralhar array
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Abre o modal e gera o sorteio
+  const abrirModalSorteioSemifinais = () => {
     if (!quartasCompletas) {
       alert("As quartas de final ainda não estão completas!");
       return;
@@ -146,12 +176,43 @@ export default function ConfrontosPage() {
       return;
     }
 
-    if (
-      !confirm("Deseja finalizar as quartas de final e gerar as semifinais?")
-    ) {
+    if (vencedoresQuartas.length !== 4) {
+      alert(
+        "É necessário ter 4 vencedores das quartas para sortear as semifinais."
+      );
       return;
     }
 
+    // Define datas padrão (7 dias a partir de hoje)
+    const dataDefault = new Date();
+    dataDefault.setDate(dataDefault.getDate() + 7);
+    const dataStr = dataDefault.toISOString().slice(0, 16); // formato datetime-local
+    setDataSemifinal1(dataStr);
+    setDataSemifinal2(dataStr);
+
+    // Gera sorteio aleatório
+    gerarNovoSorteio();
+    setModalSorteioSemifinais(true);
+  };
+
+  // Gera um novo sorteio aleatório
+  const gerarNovoSorteio = () => {
+    const timesEmbaralhados = shuffleArray(vencedoresQuartas);
+    setSorteioSemifinais({
+      jogo1: { time1: timesEmbaralhados[0], time2: timesEmbaralhados[1] },
+      jogo2: { time1: timesEmbaralhados[2], time2: timesEmbaralhados[3] },
+    });
+  };
+
+  // Confirma o sorteio e cria os jogos
+  const confirmarSorteioSemifinais = async () => {
+    if (!sorteioSemifinais) return;
+    if (!dataSemifinal1 || !dataSemifinal2) {
+      alert("Por favor, defina as datas dos jogos.");
+      return;
+    }
+
+    setModalSorteioSemifinais(false);
     setFinalizando(true);
     try {
       const response = await fetch("/api/finalizar-quartas", {
@@ -159,6 +220,20 @@ export default function ConfrontosPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          sorteioManual: {
+            jogo1: {
+              time1: sorteioSemifinais.jogo1.time1.id,
+              time2: sorteioSemifinais.jogo1.time2.id,
+              dataJogo: dataSemifinal1,
+            },
+            jogo2: {
+              time1: sorteioSemifinais.jogo2.time1.id,
+              time2: sorteioSemifinais.jogo2.time2.id,
+              dataJogo: dataSemifinal2,
+            },
+          },
+        }),
       });
 
       const data = await response.json();
@@ -173,6 +248,7 @@ export default function ConfrontosPage() {
       alert("Erro ao finalizar quartas. Tente novamente.");
     } finally {
       setFinalizando(false);
+      setSorteioSemifinais(null);
     }
   };
 
@@ -278,17 +354,17 @@ export default function ConfrontosPage() {
               </Button>
             )}
 
-            {/* Botão para finalizar quartas */}
+            {/* Botão para sortear semifinais */}
             {jaTemQuartas && !jaTemSemifinais && (
               <Button
-                onClick={finalizarQuartas}
+                onClick={abrirModalSorteioSemifinais}
                 disabled={finalizando || !quartasCompletas}
                 className={`gap-2 ${
                   quartasCompletas
                     ? "bg-blue-600 hover:bg-blue-700"
                     : "bg-gray-400"
                 }`}>
-                {finalizando ? "Finalizando..." : <>⚽ Finalizar Quartas</>}
+                {finalizando ? "Finalizando..." : <>🎲 Sortear Semifinais</>}
               </Button>
             )}
 
@@ -370,6 +446,64 @@ export default function ConfrontosPage() {
                 disabled={removendo}
                 className="gap-2 border-orange-500 text-orange-500 hover:bg-orange-500/10">
                 {removendo ? "Removendo..." : "↩️ Voltar p/ Fase de Grupos"}
+              </Button>
+            )}
+
+            {/* Botão para voltar às quartas (remover semifinais) */}
+            {jaTemSemifinais && !jaTemFinal && (
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (
+                    !confirm(
+                      "⚠️ Tem certeza que deseja REMOVER as semifinais e voltar para as quartas de final?\n\nEsta ação não pode ser desfeita."
+                    )
+                  )
+                    return;
+                  setRemovendo(true);
+                  try {
+                    await removerJogosPorFase("semifinal");
+                    alert(
+                      "✅ Semifinais removidas! Você voltou para as quartas de final."
+                    );
+                  } catch (e) {
+                    console.error(e);
+                    alert("❌ Erro ao remover semifinais.");
+                  } finally {
+                    setRemovendo(false);
+                  }
+                }}
+                disabled={removendo}
+                className="gap-2 border-purple-500 text-purple-500 hover:bg-purple-500/10">
+                {removendo ? "Removendo..." : "↩️ Voltar p/ Quartas"}
+              </Button>
+            )}
+
+            {/* Botão para voltar às semifinais (remover final) */}
+            {jaTemFinal && !campeao && (
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (
+                    !confirm(
+                      "⚠️ Tem certeza que deseja REMOVER a final e voltar para as semifinais?\n\nEsta ação não pode ser desfeita."
+                    )
+                  )
+                    return;
+                  setRemovendo(true);
+                  try {
+                    await removerJogosPorFase("final");
+                    alert("✅ Final removida! Você voltou para as semifinais.");
+                  } catch (e) {
+                    console.error(e);
+                    alert("❌ Erro ao remover final.");
+                  } finally {
+                    setRemovendo(false);
+                  }
+                }}
+                disabled={removendo}
+                className="gap-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500/10">
+                {removendo ? "Removendo..." : "↩️ Voltar p/ Semifinais"}
               </Button>
             )}
 
@@ -696,6 +830,156 @@ export default function ConfrontosPage() {
               onClick={confirmarFinalizarGrupos}
               className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold">
               ✅ Confirmar e Gerar Quartas
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para sortear semifinais */}
+      <Dialog
+        open={modalSorteioSemifinais}
+        onOpenChange={(open) => {
+          setModalSorteioSemifinais(open);
+          if (!open) setSorteioSemifinais(null);
+        }}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border border-purple-500/30 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
+              <span className="text-3xl">🎲</span>
+              Sorteio das Semifinais
+            </DialogTitle>
+            <DialogDescription className="text-purple-200 text-center">
+              Times classificados das quartas de final
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4 space-y-4 overflow-y-auto flex-1">
+            {/* Lista dos times classificados */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <h3 className="font-bold text-lg text-purple-300 mb-3 flex items-center gap-2">
+                <span className="text-xl">🏆</span>
+                Classificados das Quartas
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {vencedoresQuartas.map((time, idx) => (
+                  <div
+                    key={time.id}
+                    className="flex items-center gap-2 p-2 rounded-lg bg-purple-500/20 border border-purple-500/30">
+                    <span className="text-lg">⚽</span>
+                    <span className="font-medium text-white truncate">
+                      {time.nome}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Resultado do sorteio */}
+            {sorteioSemifinais && (
+              <div className="space-y-3">
+                <h3 className="font-bold text-lg text-center text-yellow-300 flex items-center justify-center gap-2">
+                  <span className="text-xl">⚔️</span>
+                  Confrontos Sorteados
+                </h3>
+
+                {/* Semifinal 1 */}
+                <div className="bg-gradient-to-r from-blue-600/30 to-blue-800/30 rounded-xl p-4 border border-blue-500/40">
+                  <div className="text-xs text-blue-300 mb-2 text-center font-semibold">
+                    SEMIFINAL 1
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 text-center">
+                      <div className="bg-white/10 rounded-lg py-2 px-3">
+                        <span className="font-bold text-white">
+                          {sorteioSemifinais.jogo1.time1.nome}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mx-3 text-2xl font-bold text-yellow-400">
+                      VS
+                    </div>
+                    <div className="flex-1 text-center">
+                      <div className="bg-white/10 rounded-lg py-2 px-3">
+                        <span className="font-bold text-white">
+                          {sorteioSemifinais.jogo1.time2.nome}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className="text-xs text-blue-300 mb-1 block">
+                      📅 Data e Hora
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={dataSemifinal1}
+                      onChange={(e) => setDataSemifinal1(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg bg-white/10 border border-blue-500/30 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Semifinal 2 */}
+                <div className="bg-gradient-to-r from-green-600/30 to-green-800/30 rounded-xl p-4 border border-green-500/40">
+                  <div className="text-xs text-green-300 mb-2 text-center font-semibold">
+                    SEMIFINAL 2
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 text-center">
+                      <div className="bg-white/10 rounded-lg py-2 px-3">
+                        <span className="font-bold text-white">
+                          {sorteioSemifinais.jogo2.time1.nome}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mx-3 text-2xl font-bold text-yellow-400">
+                      VS
+                    </div>
+                    <div className="flex-1 text-center">
+                      <div className="bg-white/10 rounded-lg py-2 px-3">
+                        <span className="font-bold text-white">
+                          {sorteioSemifinais.jogo2.time2.nome}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className="text-xs text-green-300 mb-1 block">
+                      📅 Data e Hora
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={dataSemifinal2}
+                      onChange={(e) => setDataSemifinal2(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg bg-white/10 border border-green-500/30 text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex gap-3 sm:gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setModalSorteioSemifinais(false);
+                setSorteioSemifinais(null);
+              }}
+              className="flex-1 bg-transparent border-white/30 text-white hover:bg-white/10">
+              Cancelar
+            </Button>
+            <Button
+              onClick={gerarNovoSorteio}
+              variant="outline"
+              className="flex-1 bg-purple-600/30 border-purple-500/50 text-white hover:bg-purple-600/50">
+              🎲 Novo Sorteio
+            </Button>
+            <Button
+              onClick={confirmarSorteioSemifinais}
+              disabled={!sorteioSemifinais}
+              className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold">
+              ✅ Confirmar
             </Button>
           </DialogFooter>
         </DialogContent>

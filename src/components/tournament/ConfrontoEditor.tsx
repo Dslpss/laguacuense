@@ -50,12 +50,27 @@ export function ConfrontoEditor({ jogo }: Props) {
 
   const [golsA, setGolsA] = useState<number>(jogo.golsTimeA ?? 0);
   const [golsB, setGolsB] = useState<number>(jogo.golsTimeB ?? 0);
+  const [penaltisA, setPenaltisA] = useState<number | undefined>(
+    jogo.penaltisTimeA
+  );
+  const [penaltisB, setPenaltisB] = useState<number | undefined>(
+    jogo.penaltisTimeB
+  );
   const [tipoEvento, setTipoEvento] = useState<EventoTipo>("gol");
   const [lado, setLado] = useState<"A" | "B">("A");
   const [jogadorId, setJogadorId] = useState<string>("");
   const [minuto, setMinuto] = useState<string>("");
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [mostrarEventos, setMostrarEventos] = useState(false);
+
+  // Verifica se é fase eliminatória (precisa definir vencedor em caso de empate)
+  const faseEliminatoria =
+    jogo.fase === "quartas" ||
+    jogo.fase === "semifinal" ||
+    jogo.fase === "final";
+  const jogoEmpatado = golsA === golsB;
+  const temPenaltis = penaltisA !== undefined && penaltisB !== undefined;
+  const penaltisValidos = temPenaltis && penaltisA !== penaltisB;
 
   // Estados para edição de data/hora
   const [editandoData, setEditandoData] = useState(false);
@@ -130,14 +145,38 @@ export function ConfrontoEditor({ jogo }: Props) {
   };
 
   const salvarPlacar = async () => {
+    // Validar: se fase eliminatória e empate, deve ter placar de pênaltis válido
+    if (faseEliminatoria && jogoEmpatado) {
+      if (!temPenaltis) {
+        setErroSalvar("Jogo empatado! Informe o placar dos pênaltis.");
+        return;
+      }
+      if (!penaltisValidos) {
+        setErroSalvar("Pênaltis não podem terminar empatados!");
+        return;
+      }
+    }
+
     setSalvando(true);
     setErroSalvar(null);
     try {
-      await atualizarJogo(jogo.id, {
+      const dadosAtualizar: Record<string, unknown> = {
         golsTimeA: Number(golsA),
         golsTimeB: Number(golsB),
         finalizado: true,
-      });
+      };
+
+      // Se empatou em fase eliminatória, salvar pênaltis
+      if (faseEliminatoria && jogoEmpatado && temPenaltis) {
+        dadosAtualizar.penaltisTimeA = Number(penaltisA);
+        dadosAtualizar.penaltisTimeB = Number(penaltisB);
+      } else {
+        // Limpar pênaltis se não for empate
+        dadosAtualizar.penaltisTimeA = null;
+        dadosAtualizar.penaltisTimeB = null;
+      }
+
+      await atualizarJogo(jogo.id, dadosAtualizar);
       setSalvo(true);
     } catch {
       setErroSalvar("Erro ao salvar placar");
@@ -186,23 +225,27 @@ export function ConfrontoEditor({ jogo }: Props) {
   const nomeTimeB = timeB?.nome ?? jogo.timeB;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex flex-col gap-1">
-          <CardTitle className="flex items-center gap-2 flex-wrap break-words">
-            {nomeTimeA} × {nomeTimeB}{" "}
-            {jogo.grupo ? `• Grupo ${jogo.grupo}` : ""}
+    <Card className="overflow-hidden">
+      <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-1 min-w-0 flex-1">
+          <CardTitle className="flex items-center gap-2 flex-wrap break-words text-base md:text-lg">
+            <span className="break-all">{nomeTimeA}</span>
+            <span>×</span>
+            <span className="break-all">{nomeTimeB}</span>
+            {jogo.grupo && (
+              <span className="whitespace-nowrap">• Grupo {jogo.grupo}</span>
+            )}
             {jogo.finalizado && (
-              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full whitespace-nowrap">
                 Finalizado
               </span>
             )}
           </CardTitle>
-          <div className="text-sm text-gray-600 flex items-center gap-2">
+          <div className="text-sm text-gray-600 flex items-center gap-2 flex-wrap">
             {!editandoData ? (
               <>
                 <svg
-                  className="w-4 h-4"
+                  className="w-4 h-4 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor">
@@ -213,7 +256,7 @@ export function ConfrontoEditor({ jogo }: Props) {
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-                <span>
+                <span className="whitespace-nowrap">
                   {jogo.dataJogo?.toDate?.()?.toLocaleString?.("pt-BR", {
                     day: "2-digit",
                     month: "2-digit",
@@ -231,19 +274,19 @@ export function ConfrontoEditor({ jogo }: Props) {
                 </Button>
               </>
             ) : (
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 w-full">
                 <div className="flex items-center gap-2 flex-wrap">
                   <Input
                     type="date"
                     value={novaData}
                     onChange={(e) => setNovaData(e.target.value)}
-                    className="w-36 h-8 text-sm"
+                    className="w-full sm:w-36 h-8 text-sm"
                   />
                   <Input
                     type="time"
                     value={novaHora}
                     onChange={(e) => setNovaHora(e.target.value)}
-                    className="w-28 h-8 text-sm"
+                    className="w-full sm:w-28 h-8 text-sm"
                   />
                   <Button
                     size="sm"
@@ -280,12 +323,13 @@ export function ConfrontoEditor({ jogo }: Props) {
         </div>
         <Button
           variant="destructive"
-          className="h-10 px-4"
+          className="h-10 px-4 w-full md:w-auto flex-shrink-0 text-sm"
           onClick={removerConfrontoCompleto}>
           🗑️ Remover confronto
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Placar do tempo normal */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
           <div>
             <Label className="mb-1 leading-tight">{nomeTimeA} (gols)</Label>
@@ -307,10 +351,86 @@ export function ConfrontoEditor({ jogo }: Props) {
               disabled={salvo}
             />
           </div>
-          <div className="md:col-span-2 text-sm text-green-700">
-            Atualize o placar e salve. Os eventos abaixo não alteram
-            automaticamente o placar (flexível para W.O., correções etc.).
-          </div>
+
+          {/* Texto de ajuda quando não é empate em eliminatória */}
+          {!(faseEliminatoria && jogoEmpatado) && (
+            <div className="md:col-span-2 text-sm text-green-700">
+              Atualize o placar e salve. Os eventos abaixo não alteram
+              automaticamente o placar (flexível para W.O., correções etc.).
+            </div>
+          )}
+
+          {/* Campos de pênaltis - aparecem apenas em fases eliminatórias com empate */}
+          {faseEliminatoria && jogoEmpatado && (
+            <>
+              <div className="md:col-span-3 mt-2">
+                <div className="bg-amber-50 border border-amber-300 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-amber-600 font-bold">
+                      ⚠️ Empate no tempo normal!
+                    </span>
+                    <span className="text-amber-700 text-sm">
+                      Informe o placar dos pênaltis:
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="mb-1 text-sm text-amber-700">
+                        {nomeTimeA} (pênaltis)
+                      </Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={penaltisA ?? ""}
+                        onChange={(e) =>
+                          setPenaltisA(
+                            e.target.value === ""
+                              ? undefined
+                              : Number(e.target.value)
+                          )
+                        }
+                        disabled={salvo}
+                        className="border-amber-400 bg-white"
+                        placeholder="Ex: 4"
+                      />
+                    </div>
+                    <div>
+                      <Label className="mb-1 text-sm text-amber-700">
+                        {nomeTimeB} (pênaltis)
+                      </Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={penaltisB ?? ""}
+                        onChange={(e) =>
+                          setPenaltisB(
+                            e.target.value === ""
+                              ? undefined
+                              : Number(e.target.value)
+                          )
+                        }
+                        disabled={salvo}
+                        className="border-amber-400 bg-white"
+                        placeholder="Ex: 3"
+                      />
+                    </div>
+                  </div>
+                  {temPenaltis && penaltisValidos && (
+                    <div className="mt-2 text-sm text-green-700 font-medium">
+                      ✓ Vencedor nos pênaltis:{" "}
+                      {penaltisA! > penaltisB! ? nomeTimeA : nomeTimeB}
+                    </div>
+                  )}
+                  {temPenaltis && !penaltisValidos && (
+                    <div className="mt-2 text-sm text-red-600 font-medium">
+                      ✗ Pênaltis não podem terminar empatados!
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
           <div className="space-y-2">
             <Button
               className="w-full h-10"
