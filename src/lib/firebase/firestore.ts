@@ -218,6 +218,37 @@ export const removerTodosJogos = async () => {
   }
 };
 
+// Remover jogos de uma fase específica (quartas, semifinal, final)
+export const removerJogosPorFase = async (
+  fase: "quartas" | "semifinal" | "final"
+) => {
+  try {
+    const jogosSnap = await getDocs(collection(db, "jogos"));
+    const batch = writeBatch(db);
+
+    for (const jogoDoc of jogosSnap.docs) {
+      const jogoData = jogoDoc.data();
+      if (jogoData.fase === fase) {
+        // Remover eventos do jogo
+        const eventosSnap = await getDocs(
+          collection(db, "jogos", jogoDoc.id, "eventos")
+        );
+        eventosSnap.docs.forEach((eventoDoc) => {
+          batch.delete(eventoDoc.ref);
+        });
+
+        // Remover o jogo
+        batch.delete(jogoDoc.ref);
+      }
+    }
+
+    await batch.commit();
+  } catch (error) {
+    console.error(`Erro ao remover jogos da fase ${fase}:`, error);
+    throw error;
+  }
+};
+
 // Funções para Sorteios
 export const salvarSorteio = async (sorteio: Omit<Sorteio, "id">) => {
   try {

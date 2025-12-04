@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import { ListaTimesPublica } from "@/components/tournament/ListaTimesPublica";
 import { TabelaClassificacao } from "@/components/tournament/TabelaClassificacao";
@@ -14,7 +14,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useTimes } from "@/hooks/useTimes";
-import { Trophy, Users, Calendar, BookOpen } from "lucide-react";
+import {
+  Trophy,
+  Users,
+  Calendar,
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
 import { useJogos } from "@/hooks/useJogos";
 import { useJogadoresPorIds } from "@/hooks/useJogadoresPorIds";
 
@@ -34,6 +41,16 @@ export default function PaginaPublica() {
     {} as Record<string, import("@/types").Time>
   );
 
+  // Estado para expand/collapse das seções de fase
+  const [secaoExpandida, setSecaoExpandida] = useState<Record<string, boolean>>(
+    {
+      final: true,
+      semifinal: true,
+      quartas: true,
+      grupos: true,
+    }
+  );
+
   // Adicionar estado de paginação
   const [paginaAtual, setPaginaAtual] = useState(1);
   const PAGE_SIZE = 6;
@@ -48,7 +65,9 @@ export default function PaginaPublica() {
     Array<{ jogadorId: string; timeId: string }>
   >([]);
   // Expand/collapse de gols por jogo (público)
-  const [golsExpandidoPorJogo, setGolsExpandidoPorJogo] = useState<Record<string, boolean>>({});
+  const [golsExpandidoPorJogo, setGolsExpandidoPorJogo] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     const unsubList: (() => void)[] = [];
@@ -89,6 +108,196 @@ export default function PaginaPublica() {
   const inicio = (paginaAtual - 1) * PAGE_SIZE;
   const jogosVisiveis = jogos.slice(inicio, inicio + PAGE_SIZE);
 
+  // Agrupar jogos por fase
+  const jogosPorFase = useMemo(() => {
+    const grupos: Record<string, typeof jogos> = {
+      final: [],
+      semifinal: [],
+      quartas: [],
+      grupos: [],
+    };
+    jogos.forEach((jogo) => {
+      if (jogo.fase === "final") grupos.final.push(jogo);
+      else if (jogo.fase === "semifinal") grupos.semifinal.push(jogo);
+      else if (jogo.fase === "quartas") grupos.quartas.push(jogo);
+      else grupos.grupos.push(jogo);
+    });
+    return grupos;
+  }, [jogos]);
+
+  // Verificar se uma fase está concluída (todos os jogos finalizados)
+  const faseConcluida = (fase: string) => {
+    const jogosF = jogosPorFase[fase] || [];
+    return jogosF.length > 0 && jogosF.every((j) => j.finalizado);
+  };
+
+  // Identificar a fase atual (primeira fase não concluída com jogos)
+  const faseAtual = useMemo(() => {
+    if (jogosPorFase.final.length > 0 && !faseConcluida("final"))
+      return "final";
+    if (jogosPorFase.semifinal.length > 0 && !faseConcluida("semifinal"))
+      return "semifinal";
+    if (jogosPorFase.quartas.length > 0 && !faseConcluida("quartas"))
+      return "quartas";
+    if (jogosPorFase.grupos.length > 0 && !faseConcluida("grupos"))
+      return "grupos";
+    // Se todas estão concluídas, mostrar final
+    if (jogosPorFase.final.length > 0) return "final";
+    if (jogosPorFase.semifinal.length > 0) return "semifinal";
+    if (jogosPorFase.quartas.length > 0) return "quartas";
+    return "grupos";
+  }, [jogosPorFase]);
+
+  // Função para toggle de seção
+  const toggleSecao = (fase: string) => {
+    setSecaoExpandida((prev) => ({ ...prev, [fase]: !prev[fase] }));
+  };
+
+  // Função para renderizar card de jogo
+  const renderCardJogo = (jogo: (typeof jogos)[0]) => {
+    const timeA = timesMap[jogo.timeA];
+    const timeB = timesMap[jogo.timeB];
+    const golsA = jogo.golsTimeA ?? 0;
+    const golsB = jogo.golsTimeB ?? 0;
+    let vencedor = null as string | null;
+    if (jogo.finalizado) {
+      if (golsA > golsB) vencedor = timeA?.nome ?? null;
+      else if (golsB > golsA) vencedor = timeB?.nome ?? null;
+      else vencedor = "Empate";
+    }
+    const eventos = eventosJogos[jogo.id] || [];
+    const gols = eventos.filter((ev) => ev.tipo === "gol");
+
+    return (
+      <div
+        key={jogo.id}
+        className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl p-4 pl-6 sm:p-6 shadow-xl border border-blue-900/40 relative overflow-hidden">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs sm:text-sm text-blue-200 font-semibold">
+            {jogo.fase === "grupos"
+              ? `Grupo ${jogo.grupo}`
+              : jogo.fase.charAt(0).toUpperCase() + jogo.fase.slice(1)}
+          </span>
+          <span className="text-xs text-blue-400">
+            {jogo.dataJogo?.toDate?.()?.toLocaleString?.("pt-BR")}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-2 sm:gap-4 px-2 sm:px-3">
+          <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
+            <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
+              {timeA?.nome ?? "Time A"}
+            </span>
+            {timeA?.logoUrl && (
+              <Image
+                src={timeA.logoUrl}
+                alt={timeA.nome}
+                width={48}
+                height={48}
+                className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
+              />
+            )}
+          </div>
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-lg sm:text-2xl font-black text-white">
+              {golsA} <span className="text-blue-400">x</span> {golsB}
+            </span>
+            {jogo.finalizado && (
+              <span
+                className={`mt-2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
+                  vencedor === "Empate"
+                    ? "bg-gray-700 text-gray-200"
+                    : "bg-blue-700 text-white"
+                }`}>
+                {vencedor === "Empate" ? "Empate" : `Vencedor: ${vencedor}`}
+              </span>
+            )}
+            {!jogo.finalizado && (
+              <span className="mt-2 px-3 py-1 rounded-full text-xs font-bold bg-yellow-600/50 text-yellow-100">
+                A disputar
+              </span>
+            )}
+            {/* Gols marcados */}
+            {gols.length > 0 && (
+              <div className="mt-2 text-xs text-blue-200">
+                <div className="flex items-center justify-center gap-2 font-bold">
+                  <span>Gols marcados</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
+                    onClick={() =>
+                      setGolsExpandidoPorJogo((prev) => ({
+                        ...prev,
+                        [jogo.id]: !prev[jogo.id],
+                      }))
+                    }>
+                    {golsExpandidoPorJogo[jogo.id] ? "Ocultar" : "Mostrar"}
+                  </Button>
+                </div>
+                {golsExpandidoPorJogo[jogo.id] && (
+                  <div className="absolute inset-0 z-10 p-6">
+                    <div className="bg-blue-950/90 backdrop-blur rounded-lg p-3 border border-blue-800/40 shadow-lg h-full flex flex-col">
+                      <div className="flex items-center justify-between font-bold text-blue-100 mb-2">
+                        <span className="text-xs">Gols marcados</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
+                          onClick={() =>
+                            setGolsExpandidoPorJogo((prev) => ({
+                              ...prev,
+                              [jogo.id]: false,
+                            }))
+                          }>
+                          Fechar
+                        </Button>
+                      </div>
+                      <div className="flex-1 overflow-y-auto pr-1">
+                        <ul className="space-y-1 text-center text-xs text-blue-100">
+                          {gols.map((gol) => (
+                            <li key={gol.id}>
+                              <span className="font-semibold">
+                                {gol.timeId === timeA?.id
+                                  ? timeA?.nome
+                                  : timeB?.nome}
+                              </span>{" "}
+                              - Jogador:{" "}
+                              <span className="font-bold">
+                                {jogadoresMap[gol.jogadorId]?.nome ??
+                                  gol.jogadorId}
+                              </span>
+                              {gol.minuto !== undefined && (
+                                <>( {gol.minuto}&apos;)</>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
+            <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
+              {timeB?.nome ?? "Time B"}
+            </span>
+            {timeB?.logoUrl && (
+              <Image
+                src={timeB.logoUrl}
+                alt={timeB.nome}
+                width={48}
+                height={48}
+                className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Background Pattern */}
@@ -98,8 +307,7 @@ export default function PaginaPublica() {
             id="grid"
             width="40"
             height="40"
-            patternUnits="userSpaceOnUse"
-          >
+            patternUnits="userSpaceOnUse">
             <path
               d="M 40 0 L 0 0 0 40"
               fill="none"
@@ -170,8 +378,7 @@ export default function PaginaPublica() {
                   className="h-5 w-5 text-yellow-300"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -193,8 +400,7 @@ export default function PaginaPublica() {
                   className="h-5 w-5 text-blue-300"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -219,8 +425,7 @@ export default function PaginaPublica() {
             <Button
               size="lg"
               onClick={() => setRegulamentoAberto(true)}
-              className="h-10 sm:h-14 px-4 sm:px-8 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-2xl hover:shadow-green-500/50 transition-all border-2 border-green-400/30 hover:scale-105 w-full sm:w-auto"
-            >
+              className="h-10 sm:h-14 px-4 sm:px-8 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-2xl hover:shadow-green-500/50 transition-all border-2 border-green-400/30 hover:scale-105 w-full sm:w-auto">
               <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
               <span className="text-sm sm:text-lg font-bold">
                 Ver Regulamento Completo
@@ -239,14 +444,12 @@ export default function PaginaPublica() {
                 abaSelecionada === "times"
                   ? "h-10 sm:h-12 px-3 sm:px-6 bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:shadow-xl"
                   : "h-10 sm:h-12 px-3 sm:px-6 text-white hover:bg-white/10"
-              }
-            >
+              }>
               <svg
                 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+                stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -263,8 +466,7 @@ export default function PaginaPublica() {
                 abaSelecionada === "classificacao"
                   ? "h-10 sm:h-12 px-3 sm:px-6 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-lg hover:shadow-xl"
                   : "h-10 sm:h-12 px-3 sm:px-6 text-white hover:bg-white/10"
-              }
-            >
+              }>
               <Trophy className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
               <span className="text-sm sm:text-base">Classificação</span>
             </Button>
@@ -275,14 +477,12 @@ export default function PaginaPublica() {
                 abaSelecionada === "confrontos"
                   ? "h-10 sm:h-12 px-3 sm:px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:shadow-xl"
                   : "h-10 sm:h-12 px-3 sm:px-6 text-white hover:bg-white/10"
-              }
-            >
+              }>
               <svg
                 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+                stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -299,14 +499,12 @@ export default function PaginaPublica() {
                 abaSelecionada === "chaveamento"
                   ? "h-10 sm:h-12 px-3 sm:px-6 bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:shadow-xl"
                   : "h-10 sm:h-12 px-3 sm:px-6 text-white hover:bg-white/10"
-              }
-            >
+              }>
               <svg
                 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+                stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -337,7 +535,7 @@ export default function PaginaPublica() {
             <div className="max-w-7xl mx-auto px-2 sm:px-4">
               <div className="space-y-4 sm:space-y-6">
                 <h2 className="text-2xl sm:text-3xl font-bold text-blue-300 mb-4 text-center">
-                  Confrontos
+                  Confrontos do Campeonato
                 </h2>
                 {carregandoJogos ? (
                   <p className="text-center text-muted-foreground">
@@ -348,180 +546,202 @@ export default function PaginaPublica() {
                     Nenhum confronto cadastrado ainda.
                   </p>
                 ) : (
-                  <>
-                    {/* Lista e paginação */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                            {jogosVisiveis.map((jogo) => {
-                              const timeA = timesMap[jogo.timeA];
-                              const timeB = timesMap[jogo.timeB];
-                              const golsA = jogo.golsTimeA ?? 0;
-                              const golsB = jogo.golsTimeB ?? 0;
-                              let vencedor = null as string | null;
-                              if (jogo.finalizado) {
-                                if (golsA > golsB) vencedor = timeA?.nome ?? null;
-                                else if (golsB > golsA) vencedor = timeB?.nome ?? null;
-                                else vencedor = "Empate";
-                              }
-                              // Eventos do jogo
-                              const eventos = eventosJogos[jogo.id] || [];
-                              const gols = eventos.filter((ev) => ev.tipo === "gol");
+                  <div className="space-y-6">
+                    {/* Seção Final */}
+                    {jogosPorFase.final.length > 0 && (
+                      <div className="rounded-xl overflow-hidden border border-yellow-500/30 shadow-lg">
+                        <button
+                          onClick={() => toggleSecao("final")}
+                          className={`w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white font-bold text-lg hover:from-yellow-700 hover:to-yellow-800 transition-all ${
+                            faseConcluida("final") ? "opacity-90" : ""
+                          }`}>
+                          <div className="flex items-center gap-3">
+                            <Trophy className="h-5 w-5" />
+                            <span>🏆 Final</span>
+                            {faseConcluida("final") && (
+                              <span className="ml-2 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full">
+                                ✓ Concluída
+                              </span>
+                            )}
+                            {faseAtual === "final" &&
+                              !faseConcluida("final") && (
+                                <span className="ml-2 px-2 py-0.5 bg-yellow-300 text-yellow-900 text-xs rounded-full animate-pulse">
+                                  Em andamento
+                                </span>
+                              )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm opacity-80">
+                              {jogosPorFase.final.length} jogo(s)
+                            </span>
+                            {secaoExpandida.final ? (
+                              <ChevronDown className="h-5 w-5" />
+                            ) : (
+                              <ChevronRight className="h-5 w-5" />
+                            )}
+                          </div>
+                        </button>
+                        {secaoExpandida.final && (
+                          <div className="p-4 bg-yellow-950/20">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                              {jogosPorFase.final.map((jogo) =>
+                                renderCardJogo(jogo)
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Seção Semifinais */}
+                    {jogosPorFase.semifinal.length > 0 && (
+                      <div className="rounded-xl overflow-hidden border border-purple-500/30 shadow-lg">
+                        <button
+                          onClick={() => toggleSecao("semifinal")}
+                          className={`w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold text-lg hover:from-purple-700 hover:to-purple-800 transition-all ${
+                            faseConcluida("semifinal") ? "opacity-90" : ""
+                          }`}>
+                          <div className="flex items-center gap-3">
+                            <span>⚔️ Semifinais</span>
+                            {faseConcluida("semifinal") && (
+                              <span className="ml-2 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full">
+                                ✓ Concluída
+                              </span>
+                            )}
+                            {faseAtual === "semifinal" &&
+                              !faseConcluida("semifinal") && (
+                                <span className="ml-2 px-2 py-0.5 bg-purple-300 text-purple-900 text-xs rounded-full animate-pulse">
+                                  Em andamento
+                                </span>
+                              )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm opacity-80">
+                              {jogosPorFase.semifinal.length} jogo(s)
+                            </span>
+                            {secaoExpandida.semifinal ? (
+                              <ChevronDown className="h-5 w-5" />
+                            ) : (
+                              <ChevronRight className="h-5 w-5" />
+                            )}
+                          </div>
+                        </button>
+                        {secaoExpandida.semifinal && (
+                          <div className="p-4 bg-purple-950/20">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                              {jogosPorFase.semifinal.map((jogo) =>
+                                renderCardJogo(jogo)
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Seção Quartas de Final */}
+                    {jogosPorFase.quartas.length > 0 && (
+                      <div className="rounded-xl overflow-hidden border border-orange-500/30 shadow-lg">
+                        <button
+                          onClick={() => toggleSecao("quartas")}
+                          className={`w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold text-lg hover:from-orange-700 hover:to-orange-800 transition-all ${
+                            faseConcluida("quartas") ? "opacity-90" : ""
+                          }`}>
+                          <div className="flex items-center gap-3">
+                            <span>🏅 Quartas de Final</span>
+                            {faseConcluida("quartas") && (
+                              <span className="ml-2 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full">
+                                ✓ Concluída
+                              </span>
+                            )}
+                            {faseAtual === "quartas" &&
+                              !faseConcluida("quartas") && (
+                                <span className="ml-2 px-2 py-0.5 bg-orange-300 text-orange-900 text-xs rounded-full animate-pulse">
+                                  Em andamento
+                                </span>
+                              )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm opacity-80">
+                              {jogosPorFase.quartas.length} jogo(s)
+                            </span>
+                            {secaoExpandida.quartas ? (
+                              <ChevronDown className="h-5 w-5" />
+                            ) : (
+                              <ChevronRight className="h-5 w-5" />
+                            )}
+                          </div>
+                        </button>
+                        {secaoExpandida.quartas && (
+                          <div className="p-4 bg-orange-950/20">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                              {jogosPorFase.quartas.map((jogo) =>
+                                renderCardJogo(jogo)
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Seção Fase de Grupos */}
+                    {jogosPorFase.grupos.length > 0 && (
+                      <div className="rounded-xl overflow-hidden border border-blue-500/30 shadow-lg">
+                        <button
+                          onClick={() => toggleSecao("grupos")}
+                          className={`w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all ${
+                            faseConcluida("grupos") ? "opacity-90" : ""
+                          }`}>
+                          <div className="flex items-center gap-3">
+                            <span>⚽ Fase de Grupos</span>
+                            {faseConcluida("grupos") && (
+                              <span className="ml-2 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full">
+                                ✓ Concluída
+                              </span>
+                            )}
+                            {faseAtual === "grupos" &&
+                              !faseConcluida("grupos") && (
+                                <span className="ml-2 px-2 py-0.5 bg-blue-300 text-blue-900 text-xs rounded-full animate-pulse">
+                                  Em andamento
+                                </span>
+                              )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm opacity-80">
+                              {jogosPorFase.grupos.length} jogo(s)
+                            </span>
+                            {secaoExpandida.grupos ? (
+                              <ChevronDown className="h-5 w-5" />
+                            ) : (
+                              <ChevronRight className="h-5 w-5" />
+                            )}
+                          </div>
+                        </button>
+                        {secaoExpandida.grupos && (
+                          <div className="p-4 bg-blue-950/20">
+                            {/* Agrupar por grupo */}
+                            {["A", "B", "C", "D"].map((grupo) => {
+                              const jogosGrupo = jogosPorFase.grupos.filter(
+                                (j) => j.grupo === grupo
+                              );
+                              if (jogosGrupo.length === 0) return null;
                               return (
-                                <div
-                                  key={jogo.id}
-                                  className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-xl p-4 pl-6 sm:p-6 shadow-xl border border-blue-900/40 relative overflow-hidden"
-                                >
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs sm:text-sm text-blue-200 font-semibold">
-                                      {jogo.fase === "grupos"
-                                        ? `Grupo ${jogo.grupo}`
-                                        : jogo.fase.charAt(0).toUpperCase() + jogo.fase.slice(1)}
-                                    </span>
-                                    <span className="text-xs text-blue-400">
-                                      {jogo.dataJogo?.toDate?.()?.toLocaleString?.("pt-BR")}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center justify-between gap-2 sm:gap-4 px-2 sm:px-3">
-                                    <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
-                                      <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
-                                        {timeA?.nome ?? "Time A"}
-                                      </span>
-                                      {timeA?.logoUrl && (
-                                        <Image
-                                          src={timeA.logoUrl}
-                                          alt={timeA.nome}
-                                          width={48}
-                                          height={48}
-                                          className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
-                                        />
-                                      )}
-                                    </div>
-                                    <div className="flex flex-col items-center justify-center">
-                                      <span className="text-lg sm:text-2xl font-black text-white">
-                                        {golsA} <span className="text-blue-400">x</span> {golsB}
-                                      </span>
-                                      {jogo.finalizado && (
-                                        <span
-                                          className={`mt-2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                                            vencedor === "Empate" ? "bg-gray-700 text-gray-200" : "bg-blue-700 text-white"
-                                          }`}
-                                        >
-                                          {vencedor === "Empate" ? "Empate" : `Vencedor: ${vencedor}`}
-                                        </span>
-                                      )}
-                                      {/* Gols marcados */}
-                                      {gols.length > 0 && (
-                                        <div className="mt-2 text-xs text-blue-200">
-                                          <div className="flex items-center justify-center gap-2 font-bold">
-                                            <span>Gols marcados</span>
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
-                                              onClick={() =>
-                                                setGolsExpandidoPorJogo((prev) => ({
-                                                  ...prev,
-                                                  [jogo.id]: !prev[jogo.id],
-                                                }))
-                                              }
-                                            >
-                                              {golsExpandidoPorJogo[jogo.id] ? "Ocultar" : "Mostrar"}
-                                            </Button>
-                                          </div>
-                                          {golsExpandidoPorJogo[jogo.id] && (
-                                            <div className="absolute inset-0 z-10 p-6">
-                                              <div className="bg-blue-950/90 backdrop-blur rounded-lg p-3 border border-blue-800/40 shadow-lg h-full flex flex-col">
-                                                <div className="flex items-center justify-between font-bold text-blue-100 mb-2">
-                                                  <span className="text-xs">Gols marcados</span>
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-6 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40 border border-blue-800/30"
-                                                    onClick={() =>
-                                                      setGolsExpandidoPorJogo((prev) => ({ ...prev, [jogo.id]: false }))
-                                                    }
-                                                  >
-                                                    Fechar
-                                                  </Button>
-                                                </div>
-                                                <div className="flex-1 overflow-y-auto pr-1">
-                                                  <ul className="space-y-1 text-center text-xs text-blue-100">
-                                                    {gols.map((gol) => (
-                                                      <li key={gol.id}>
-                                                        <span className="font-semibold">
-                                                          {gol.timeId === timeA?.id ? timeA?.nome : timeB?.nome}
-                                                        </span>{" "}
-                                                        - Jogador:{" "}
-                                                        <span className="font-bold">
-                                                          {jogadoresMap[gol.jogadorId]?.nome ?? gol.jogadorId}
-                                                        </span>
-                                                        {gol.minuto !== undefined && <>( {gol.minuto}&apos;)</>}
-                                                      </li>
-                                                    ))}
-                                                  </ul>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="flex-1 basis-0 min-w-0 flex flex-col items-center">
-                                      <span className="inline-block max-w-[130px] sm:max-w-none text-center text-sm sm:text-lg font-bold text-blue-100 whitespace-normal sm:truncate break-words">
-                                        {timeB?.nome ?? "Time B"}
-                                      </span>
-                                      {timeB?.logoUrl && (
-                                        <Image
-                                          src={timeB.logoUrl}
-                                          alt={timeB.nome}
-                                          width={48}
-                                          height={48}
-                                          className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover mt-2"
-                                        />
-                                      )}
-                                    </div>
+                                <div key={grupo} className="mb-4">
+                                  <h4 className="text-blue-200 font-bold mb-2 text-sm">
+                                    Grupo {grupo}
+                                  </h4>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                    {jogosGrupo.map((jogo) =>
+                                      renderCardJogo(jogo)
+                                    )}
                                   </div>
                                 </div>
                               );
                             })}
                           </div>
-
-                          {/* Controles de paginação */}
-                          <div className="flex items-center justify-center gap-2 mt-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40"
-                              disabled={paginaAtual === 1}
-                              onClick={() => setPaginaAtual((p) => Math.max(1, p - 1))}
-                            >
-                              Anterior
-                            </Button>
-                            {Array.from({ length: totalPaginas }, (_, i) => (
-                              <Button
-                                key={i}
-                                variant="ghost"
-                                size="sm"
-                                className={
-                                  paginaAtual === i + 1
-                                    ? "h-7 px-2 bg-blue-700 text-white hover:bg-blue-700"
-                                    : "h-7 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40"
-                                }
-                                onClick={() => setPaginaAtual(i + 1)}
-                              >
-                                {i + 1}
-                              </Button>
-                            ))}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 text-blue-200 hover:text-white hover:bg-blue-800/40"
-                              disabled={paginaAtual === totalPaginas}
-                              onClick={() => setPaginaAtual((p) => Math.min(totalPaginas, p + 1))}
-                            >
-                              Próxima
-                            </Button>
-                          </div>
-                  </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -544,8 +764,7 @@ export default function PaginaPublica() {
                     className="h-8 w-8 text-white"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -572,8 +791,7 @@ export default function PaginaPublica() {
                       className="h-6 w-6 text-white"
                       fill="none"
                       stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                      viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -660,8 +878,7 @@ export default function PaginaPublica() {
                       className="h-6 w-6 text-white"
                       fill="none"
                       stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                      viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -760,14 +977,12 @@ export default function PaginaPublica() {
                 variant="ghost"
                 size="sm"
                 onClick={() => (window.location.href = "/login")}
-                className="mt-4 text-sm text-green-300 hover:text-white hover:bg-white/10 border border-white/20"
-              >
+                className="mt-4 text-sm text-green-300 hover:text-white hover:bg-white/10 border border-white/20">
                 <svg
                   className="h-4 w-4 mr-2"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
