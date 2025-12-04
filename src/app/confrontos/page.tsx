@@ -48,7 +48,7 @@ export default function ConfrontosPage() {
   const [modalSorteioSemifinais, setModalSorteioSemifinais] = useState(false);
   const [sorteioSemifinais, setSorteioSemifinais] = useState<{
     jogo1: { time1: Time; time2: Time };
-    jogo2: { time1: Type; time2: Time };
+    jogo2: { time1: Time; time2: Time };
   } | null>(null);
   const [dataSemifinal1, setDataSemifinal1] = useState("");
   const [dataSemifinal2, setDataSemifinal2] = useState("");
